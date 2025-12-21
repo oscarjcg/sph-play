@@ -1,17 +1,26 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 import './App.css'; // Or your styles file
 
 
 function ThreeScene() {
   const mountRef = useRef<HTMLDivElement>(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const [resetTrigger, setResetTrigger] = useState(0);
+  const [numParticles, setNumParticles] = useState(50); // Initial N
+  const [tempN, setTempN] = useState(numParticles.toString()); // For input
+  const pausedRef = useRef(isPaused);
+
+  useEffect(() => {
+    pausedRef.current = isPaused;
+  }, [isPaused]);
 
   useEffect(() => {
     const mount = mountRef.current;
     if (!mount) return;
 
     // Constants
-    const N = 50; // Adjusted for better visualization and performance
+    const N = numParticles; // Use state N
     const RHO0 = 1000.0; // Rest density
     const BOX_SIZE = new THREE.Vector2(0.5, 0.5); // Simulation box
     const GRAV = new THREE.Vector2(0.0, -9.81); // Gravity
@@ -45,63 +54,72 @@ function ThreeScene() {
       }
     }
 
-    // Compute spacing and set M and H dynamically
     const spacing = Math.sqrt(BOX_SIZE.x * BOX_SIZE.y * 0.5 / N);
+    const M = RHO0 * spacing**2; // Mass per particle 
+    // Function to create initial particles
+    function createParticles() {
+      const particles: Particle[] = [];
 
-    const M =  RHO0 * spacing**2; // Mass per particle 
-
-    // Initialize particles (dam break: left half filled, with boundary particles)
-    const particles: Particle[] = [];
-    const nx_fluid = Math.floor(BOX_SIZE.x / 2 / spacing);
-    const ny = Math.floor(BOX_SIZE.y / spacing);
-    for (let i = 0; i < nx_fluid; i++) {
-      for (let j = 0; j < ny; j++) {
-        const x = i * spacing + spacing / 2;
-        const y = j * spacing + spacing / 2;
-        if (particles.length < N) {
-          particles.push(new Particle([x, y], 'fluid'));
+      const nx_fluid = Math.floor(BOX_SIZE.x / 2 / spacing);
+      const ny = Math.floor(BOX_SIZE.y / spacing);
+      for (let i = 0; i < nx_fluid; i++) {
+        for (let j = 0; j < ny; j++) {
+          const x = i * spacing + spacing / 2;
+          const y = j * spacing + spacing / 2;
+          if (particles.length < N) {
+            // Make uneven grid
+            if (j % 2 == 0) {
+              particles.push(new Particle([x, y], 'fluid'));
+            } else {
+              particles.push(new Particle([x + 0.01, y], 'fluid'));
+            }
+            
+          }
         }
       }
+
+      // Add boundary particles (1 layer for bottom, top, left, right)
+      const num_layers = 1;
+      // Bottom
+      for (let k = 0; k < num_layers; k++) {
+        const y = - (k + 1) * spacing;
+        const nx = Math.floor(BOX_SIZE.x / spacing) + 1;
+        for (let i = 0; i < nx; i++) {
+          const x = i * spacing;
+          particles.push(new Particle([x, y], 'boundary'));
+        }
+      }
+      // Top
+      for (let k = 0; k < num_layers; k++) {
+        const y = BOX_SIZE.y + (k + 1) * spacing;
+        const nx = Math.floor(BOX_SIZE.x / spacing) + 1;
+        for (let i = 0; i < nx; i++) {
+          const x = i * spacing;
+          particles.push(new Particle([x, y], 'boundary'));
+        }
+      }
+
+      const ny_b = Math.floor(BOX_SIZE.y / spacing) + 1 + num_layers; // extend up and down
+      // Left
+      for (let k = 0; k < num_layers; k++) {
+        const x = - (k + 1) * spacing;
+        for (let j = -num_layers; j < ny_b; j++) {
+          const y = j * spacing;
+          particles.push(new Particle([x, y], 'boundary'));
+        }
+      }
+      // Right
+      for (let k = 0; k < num_layers; k++) {
+        const x = BOX_SIZE.x + (k + 1) * spacing;
+        for (let j = -num_layers; j < ny_b; j++) {
+          const y = j * spacing;
+          particles.push(new Particle([x, y], 'boundary'));
+        }
+      }
+      return particles;
     }
 
-     // Add boundary particles (4 layers for bottom, top, left, right)
-    const num_layers = 1;
-    // Bottom
-    for (let k = 0; k < num_layers; k++) {
-      const y = - (k + 1) * spacing;
-      const nx = Math.floor(BOX_SIZE.x / spacing) + 1;
-      for (let i = 0; i < nx; i++) {
-        const x = i * spacing;
-        particles.push(new Particle([x, y], 'boundary'));
-      }
-    }
-    // Top
-    for (let k = 0; k < num_layers; k++) {
-      const y = BOX_SIZE.y + (k + 1) * spacing;
-      const nx = Math.floor(BOX_SIZE.x / spacing) + 1;
-      for (let i = 0; i < nx; i++) {
-        const x = i * spacing;
-        particles.push(new Particle([x, y], 'boundary'));
-      }
-    }
-
-    const ny_b = Math.floor(BOX_SIZE.y / spacing) + 1 + num_layers; // extend up and down
-    // Left
-    for (let k = 0; k < num_layers; k++) {
-      const x = - (k + 1) * spacing;
-      for (let j = -num_layers; j < ny_b; j++) {
-        const y = j * spacing;
-        particles.push(new Particle([x, y], 'boundary'));
-      }
-    }
-    // Right
-    for (let k = 0; k < num_layers; k++) {
-      const x = BOX_SIZE.x + (k + 1) * spacing;
-      for (let j = -num_layers; j < ny_b; j++) {
-        const y = j * spacing;
-        particles.push(new Particle([x, y], 'boundary'));
-      }
-    }
+    let particles = createParticles();
 
     // Kernel functions (cubic spline from PDF, 2D)
     function kernel(r: THREE.Vector2, h: number): number {
@@ -270,7 +288,7 @@ function ThreeScene() {
     // Add color attribute
     const colorsArray = new Float32Array(fluidParticles.length * 3);
     for (let i = 0; i < fluidParticles.length; i++) {
-      // Initial color blue
+      // Initial color (e.g., blue)
       colorsArray[i * 3] = 0; // R
       colorsArray[i * 3 + 1] = 0; // G
       colorsArray[i * 3 + 2] = 1; // B
@@ -320,7 +338,9 @@ function ThreeScene() {
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
+      if (!pausedRef.current) {
         step(particles, DT, H, M, VISC, RHO0, K, GRAV);
+      }
 
         // Update positions (only fluid)
         const pos = geometry.attributes.position.array as Float32Array;
@@ -378,14 +398,40 @@ function ThreeScene() {
       material.dispose();
       renderer.dispose();
     };
-  }, []); // Empty dependency array: Run once on mount
+  }, [resetTrigger, numParticles]); // Re-run effect on reset or N change
 
-  return <div ref={mountRef} style={{ width: '100%', height: '100%' }} />;
+  const handleApplyN = () => {
+    const newN = parseInt(tempN, 10);
+    if (!isNaN(newN) && newN > 0) {
+      setNumParticles(newN);
+      setResetTrigger(prev => prev + 1); // Trigger reset
+    }
+  };
+
+  return (
+    <div ref={mountRef} style={{ width: '100%', height: '100%' }}>
+      <button style={{ position: 'absolute', zIndex: 10, top: '10px', left: '10px' }} onClick={() => setIsPaused(!isPaused)}>
+        {isPaused ? 'Resume' : 'Pause'}
+      </button>
+      <button style={{ position: 'absolute', zIndex: 10, top: '10px', left: '100px' }} onClick={() => setResetTrigger(prev => prev + 1)}>
+        Reset
+      </button>
+      <input 
+        type="number" 
+        value={tempN} 
+        onChange={(e) => setTempN(e.target.value)} 
+        style={{ position: 'absolute', zIndex: 10, top: '50px', left: '10px' }} 
+      />
+      <button style={{ position: 'absolute', zIndex: 10, top: '50px', left: '100px' }} onClick={handleApplyN}>
+        Apply N
+      </button>
+    </div>
+  );
 }
 
 export default function App() {
   return (
-    <div style={{ width: '100vw', height: '100vh' }}>
+    <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
       <ThreeScene />
     </div>
   );
