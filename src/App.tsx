@@ -22,6 +22,9 @@ function ThreeScene() {
   
     const H = 0.03; // Smoothing radius (tune based on spacing)
 
+    const SCALE_PIXELS = 5;
+    const BALL_SIZE = 5;
+
     // Particle class
     class Particle {
       r: THREE.Vector2;
@@ -215,8 +218,22 @@ function ThreeScene() {
       // No need for reflection boundaries since we have boundary particles
     }
 
+    function generateCircleTexture() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 32;
+      canvas.height = 32;
+      const ctx = canvas.getContext('2d')!;
+      ctx.beginPath();
+      ctx.arc(16, 16, 16, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffffff'; // White for alpha mapping
+      ctx.fill();
+      return new THREE.CanvasTexture(canvas);
+    }
+
     // Scene
     const scene = new THREE.Scene();
+    const axesHelper = new THREE.AxesHelper(5);
+    scene.add(axesHelper);
 
     // Camera
     const camera = new THREE.PerspectiveCamera(
@@ -233,19 +250,12 @@ function ThreeScene() {
     renderer.setClearColor(0x87CEEB); // Sky blue
     mount.appendChild(renderer.domElement);
 
-    // Cube
-    /*
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    const cube = new THREE.Mesh(geometry, material);
-    scene.add(cube);
-    */
-
-      // Filter fluid particles for visualization
+    // Filter fluid particles for visualization
     let fluidParticles = particles.filter(p => p.type === 'fluid');
 
     // Create points for fluid particles
     const geometry = new THREE.BufferGeometry();
+    
     const posArray = new Float32Array(fluidParticles.length * 3);
     for (let i = 0; i < fluidParticles.length; i++) {
       posArray[i * 3] = fluidParticles[i].r.x;
@@ -253,7 +263,16 @@ function ThreeScene() {
       posArray[i * 3 + 2] = 0;
     }
     geometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-    const material = new THREE.PointsMaterial({ size: 3, sizeAttenuation: false, color: 0x0000ff }); // Size in pixels
+    //const material = new THREE.PointsMaterial({ size: BALL_SIZE, sizeAttenuation: false, color: 0x0000ff }); // Size in pixels
+    const circleTexture = generateCircleTexture();
+    const material = new THREE.PointsMaterial({
+      size: BALL_SIZE, // Pixel size
+      sizeAttenuation: false,
+      map: circleTexture,
+      transparent: true,
+      alphaTest: 0.5, // Cuts off square edges for round shape
+      color: 0x0000ff // Blue tint
+    });
     const points = new THREE.Points(geometry, material);
     scene.add(points);
 
@@ -264,12 +283,20 @@ function ThreeScene() {
     const geometryBoundary = new THREE.BufferGeometry();
     const posArrayBoundary = new Float32Array(boundaryParticles.length * 3);
     for (let i = 0; i < boundaryParticles.length; i++) {
-      posArrayBoundary[i * 3] = boundaryParticles[i].r.x;
-      posArrayBoundary[i * 3 + 1] = boundaryParticles[i].r.y;
+      posArrayBoundary[i * 3] = boundaryParticles[i].r.x * SCALE_PIXELS;
+      posArrayBoundary[i * 3 + 1] = boundaryParticles[i].r.y * SCALE_PIXELS;
       posArrayBoundary[i * 3 + 2] = 0;
     }
     geometryBoundary.setAttribute('position', new THREE.BufferAttribute(posArrayBoundary, 3));
-    const materialBoundary = new THREE.PointsMaterial({ size: 3, sizeAttenuation: false, color: 0x000000 }); // Size in pixels
+    //const materialBoundary = new THREE.PointsMaterial({ size: BALL_SIZE, sizeAttenuation: false, color: 0x000000 }); // Size in pixels
+    const materialBoundary = new THREE.PointsMaterial({
+      size: BALL_SIZE, // Pixel size
+      sizeAttenuation: false,
+      map: circleTexture,
+      transparent: true,
+      alphaTest: 0.5, // Cuts off square edges for round shape
+      color: 0x000000 // Blue tint
+    });
     const pointsBoundary = new THREE.Points(geometryBoundary, materialBoundary);
     scene.add(pointsBoundary);
 
@@ -279,24 +306,13 @@ function ThreeScene() {
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
-        // Update positions (only fluid)
-        accumulator += DT;
-
         step(particles, DT, H, M, VISC, RHO0, K, GRAV);
 
-        /*
-        const pos = geometry.attributes.position.array as Float32Array;
-        for (let i = 0; i < fluidParticles.length; i++) {
-          pos[i * 3] = fluidParticles[i].r.x + accumulator * GRAV.x;
-          pos[i * 3 + 1] = fluidParticles[i].r.y + accumulator * GRAV.y;
-        }
-          */
         // Update positions (only fluid)
-      
         const pos = geometry.attributes.position.array as Float32Array;
         for (let i = 0; i < fluidParticles.length; i++) {
-          pos[i * 3] = fluidParticles[i].r.x;
-          pos[i * 3 + 1] = fluidParticles[i].r.y;
+          pos[i * 3] = fluidParticles[i].r.x * SCALE_PIXELS;
+          pos[i * 3 + 1] = fluidParticles[i].r.y * SCALE_PIXELS;
         }
        
         geometry.attributes.position.needsUpdate = true;
