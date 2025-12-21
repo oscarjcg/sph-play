@@ -25,6 +25,9 @@ function ThreeScene() {
     const SCALE_PIXELS = 5;
     const BALL_SIZE = 5;
 
+    // Max expected speed for color normalization (adjust based on your sim)
+    const MAX_SPEED = 1.0; // Tune this; observe console logs for actual max speeds
+
     // Particle class
     class Particle {
       r: THREE.Vector2;
@@ -263,6 +266,17 @@ function ThreeScene() {
       posArray[i * 3 + 2] = 0;
     }
     geometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+    // Add color attribute
+    const colorsArray = new Float32Array(fluidParticles.length * 3);
+    for (let i = 0; i < fluidParticles.length; i++) {
+      // Initial color blue
+      colorsArray[i * 3] = 0; // R
+      colorsArray[i * 3 + 1] = 0; // G
+      colorsArray[i * 3 + 2] = 1; // B
+    }
+    geometry.setAttribute('color', new THREE.BufferAttribute(colorsArray, 3));
+
     //const material = new THREE.PointsMaterial({ size: BALL_SIZE, sizeAttenuation: false, color: 0x0000ff }); // Size in pixels
     const circleTexture = generateCircleTexture();
     const material = new THREE.PointsMaterial({
@@ -271,7 +285,7 @@ function ThreeScene() {
       map: circleTexture,
       transparent: true,
       alphaTest: 0.5, // Cuts off square edges for round shape
-      color: 0x0000ff // Blue tint
+      vertexColors: true // Enable per-particle colors
     });
     const points = new THREE.Points(geometry, material);
     scene.add(points);
@@ -310,12 +324,31 @@ function ThreeScene() {
 
         // Update positions (only fluid)
         const pos = geometry.attributes.position.array as Float32Array;
+        const colors = geometry.attributes.color.array as Float32Array;
         for (let i = 0; i < fluidParticles.length; i++) {
           pos[i * 3] = fluidParticles[i].r.x * SCALE_PIXELS;
           pos[i * 3 + 1] = fluidParticles[i].r.y * SCALE_PIXELS;
+
+          // Update color based on velocity magnitude (blue slow -> green medium -> red fast)
+          const speed = fluidParticles[i].v.length();
+          const normalized = Math.min(speed / MAX_SPEED, 1);
+          let r = 0, g = 0, b = 0;
+          if (normalized < 0.5) {
+            r = 0;
+            g = normalized * 2;
+            b = 1 - normalized * 2;
+          } else {
+            r = (normalized - 0.5) * 2;
+            g = 1 - (normalized - 0.5) * 2;
+            b = 0;
+          }
+          colors[i * 3] = r;
+          colors[i * 3 + 1] = g;
+          colors[i * 3 + 2] = b;
         }
        
         geometry.attributes.position.needsUpdate = true;
+        geometry.attributes.color.needsUpdate = true;
 
         // Update boundary
         // TODO
