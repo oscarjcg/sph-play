@@ -10,6 +10,7 @@ function ThreeScene() {
   const [numParticles, setNumParticles] = useState(50); // Initial N
   const [tempN, setTempN] = useState(numParticles.toString()); // For input
   const pausedRef = useRef(isPaused);
+  const [fps, setFps] = useState(0);
 
   useEffect(() => {
     pausedRef.current = isPaused;
@@ -22,7 +23,7 @@ function ThreeScene() {
     // Constants
     const N = numParticles; // Use state N
     const RHO0 = 1000.0; // Rest density
-    const BOX_SIZE = new THREE.Vector2(0.5, 0.5); // Simulation box
+    const BOX_SIZE = new THREE.Vector2(1.5, 1.5); // Simulation box
     const GRAV = new THREE.Vector2(0.0, -9.81); // Gravity
     const DT = 0.0003;
     const C = 20.0; // Speed of sound (lower for softer water)
@@ -31,7 +32,7 @@ function ThreeScene() {
   
     const H = 0.03; // Smoothing radius (tune based on spacing)
 
-    const SCALE_PIXELS = 5;
+    const SCALE_PIXELS = 2;
     const BALL_SIZE = 5;
 
     // Max expected speed for color normalization (adjust based on your sim)
@@ -335,6 +336,8 @@ function ThreeScene() {
     // Animation loop
     let animationFrameId: number;
     let accumulator = 0;
+    let lastTime = performance.now();
+    let frameCount = 0;
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
@@ -377,7 +380,14 @@ function ThreeScene() {
 
         renderer.render(scene, camera);
       
-      
+        // FPS calculation
+        frameCount++;
+        const now = performance.now();
+        if (now - lastTime >= 1000) {
+          setFps(frameCount);
+          frameCount = 0;
+          lastTime = now;
+        }
     };
     animate();
 
@@ -410,6 +420,9 @@ function ThreeScene() {
 
   return (
     <div ref={mountRef} style={{ width: '100%', height: '100%' }}>
+      <div style={{ position: 'absolute', zIndex: 10, top: '10px', right: '10px' }}>
+        FPS: {fps}
+      </div>
       <button style={{ position: 'absolute', zIndex: 10, top: '10px', left: '10px' }} onClick={() => setIsPaused(!isPaused)}>
         {isPaused ? 'Resume' : 'Pause'}
       </button>
