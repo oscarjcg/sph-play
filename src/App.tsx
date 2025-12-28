@@ -23,7 +23,7 @@ function ThreeScene() {
     // Constants
     const N = numParticles; // Use state N
     const RHO0 = 1000.0; // Rest density
-    const BOX_SIZE = new THREE.Vector2(1.5, 1.5); // Simulation box
+    const BOX_SIZE = new THREE.Vector2(3.5, 3.5); // Simulation box
     const GRAV = new THREE.Vector2(0.0, -9.81); // Gravity
     const DT = 0.0003;
     const C = 20.0; // Speed of sound (lower for softer water)
@@ -31,8 +31,9 @@ function ThreeScene() {
     const VISC = 0.5; // Viscosity
   
     const H = 0.03; // Smoothing radius (tune based on spacing)
+    const CELL_SIZE = H; // For spatial grid
 
-    const SCALE_PIXELS = 2;
+    const SCALE_PIXELS = 1;
     const BALL_SIZE = 5;
 
     // Max expected speed for color normalization (adjust based on your sim)
@@ -151,16 +152,45 @@ function ThreeScene() {
       return dir.multiplyScalar(sigma * dfdq / h);
     }
 
-    // Naive neighbor search (O(N^2), fine for small N)
-    function get_neighbors(i: number, particles: Particle[], h: number): number[] {
-      return particles.map((_, j) => j).filter(j => j !== i && particles[i].r.clone().sub(particles[j].r).length() < h);
+    // Spatial grid for efficient neighbor search
+    type Grid = Map<string, number[]>;
+    function build_grid(particles: Particle[], cell_size: number): Grid {
+      const grid: Grid = new Map();
+      particles.forEach((p, i) => {
+        const cx = Math.floor(p.r.x / cell_size);
+        const cy = Math.floor(p.r.y / cell_size);
+        const key = `${cx},${cy}`;
+        if (!grid.has(key)) grid.set(key, []);
+        grid.get(key)!.push(i);
+      });
+      return grid;
+    }
+
+    function get_neighbors(i: number, particles: Particle[], h: number, grid: Grid, cell_size: number): number[] {
+      const neighbors: number[] = [];
+      const p = particles[i];
+      const cx = Math.floor(p.r.x / cell_size);
+      const cy = Math.floor(p.r.y / cell_size);
+      for (let dx = -1; dx <= 1; dx++) {
+        for (let dy = -1; dy <= 1; dy++) {
+          const key = `${cx + dx},${cy + dy}`;
+          if (grid.has(key)) {
+            for (const j of grid.get(key)!) {
+              if (i !== j && p.r.clone().sub(particles[j].r).length() < h) {
+                neighbors.push(j);
+              }
+            }
+          }
+        }
+      }
+      return neighbors;
     }
 
     // Compute densities
-    function compute_densities(particles: Particle[], h: number, m: number): void {
+    function compute_densities(particles: Particle[], h: number, m: number, grid: Grid, cell_size: number): void {
       for (let i = 0; i < particles.length; i++) {
         let rho = m * kernel(new THREE.Vector2(0, 0), h); // Self-contribution
-        const neighbors = get_neighbors(i, particles, h);
+        const neighbors = get_neighbors(i, particles, h, grid, cell_size);
         for (const j of neighbors) {
           rho += m * kernel(particles[i].r.clone().sub(particles[j].r), h);
         }
@@ -178,14 +208,15 @@ function ThreeScene() {
 
     // Simulation step following Algorithm 1
     function step(particles: Particle[], dt: number, h: number, m: number, visc: number, rho0: number, k: number, grav: THREE.Vector2): void {
+      const grid = build_grid(particles, CELL_SIZE);
       // Reconstruct densities
-      compute_densities(particles, h, m);
+      compute_densities(particles, h, m, grid, CELL_SIZE);
       // Compute viscosity forces (only for fluid particles)
       const Fvisc: THREE.Vector2[] = particles.map(() => new THREE.Vector2(0, 0));
       for (let i = 0; i < particles.length; i++) {
         if (particles[i].type !== 'fluid') continue;
         let lap_v = new THREE.Vector2(0, 0);
-        const neighbors = get_neighbors(i, particles, h);
+        const neighbors = get_neighbors(i, particles, h, grid, CELL_SIZE);
         for (const j of neighbors) {
           const r_ij = particles[i].r.clone().sub(particles[j].r);
           const rn = r_ij.length();
@@ -215,7 +246,7 @@ function ThreeScene() {
       for (let i = 0; i < particles.length; i++) {
         if (particles[i].type !== 'fluid') continue;
         let gradp = new THREE.Vector2(0, 0);
-        const neighbors = get_neighbors(i, particles, h);
+        const neighbors = get_neighbors(i, particles, h, grid, CELL_SIZE);
         for (const j of neighbors) {
           const r_ij = particles[i].r.clone().sub(particles[j].r);
           const gradW = grad_kernel(r_ij, h);
@@ -335,7 +366,6 @@ function ThreeScene() {
 
     // Animation loop
     let animationFrameId: number;
-    let accumulator = 0;
     let lastTime = performance.now();
     let frameCount = 0;
 
@@ -375,8 +405,6 @@ function ThreeScene() {
 
         // Update boundary
         // TODO
-
-        console.log("Frame " + animationFrameId + " " + accumulator)
 
         renderer.render(scene, camera);
       
