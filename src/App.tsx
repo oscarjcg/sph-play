@@ -13,7 +13,7 @@ function ThreeScene3D() {
   const pausedRef = useRef(isPaused);
   const [fps, setFps] = useState(0);
 
-  let sph = new SPH3D(numParticles)
+  let sph = new SPH3D(numParticles, 0.02)
 
 
   useEffect(() => {

@@ -14,6 +14,7 @@ const H = 0.03; // Smoothing radius (tune based on spacing)
 const CELL_SIZE = H; // For spatial grid
 
 let spacing = Math.pow(BOX_SIZE.x * BOX_SIZE.y * BOX_SIZE.z * 0.5 / N, 1 / 3);
+let boundarySpacing = Math.pow(BOX_SIZE.x * BOX_SIZE.y * BOX_SIZE.z * 0.5 / N, 1 / 3);
 let M = RHO0 * spacing ** 3; // Mass per particle 
 
 // Particle class
@@ -36,9 +37,10 @@ export class Particle {
 type Grid = Map<string, number[]>;
 export class SPH3D {
 
-    constructor(n: number) {
+    constructor(n: number, bSpacing?: number) {
         N = n;
         spacing = Math.pow(BOX_SIZE.x * BOX_SIZE.y * BOX_SIZE.z * 0.5 / N, 1 / 3);
+        boundarySpacing = bSpacing ?? spacing
         M = RHO0 * spacing ** 3; // Mass per particle 
     }
 
@@ -68,78 +70,78 @@ export class SPH3D {
         const num_layers = 1;
         // Bottom (y negative)
         for (let l = 0; l < num_layers; l++) {
-            const y = - (l + 1) * spacing;
-            const nx = Math.floor(BOX_SIZE.x / spacing) + 1;
-            const nz = Math.floor(BOX_SIZE.z / spacing) + 1;
+            const y = - (l + 1) * boundarySpacing;
+            const nx = Math.floor(BOX_SIZE.x / boundarySpacing) + 1;
+            const nz = Math.floor(BOX_SIZE.z / boundarySpacing) + 1;
             for (let i = 0; i < nx; i++) {
                 for (let k = 0; k < nz; k++) {
-                    const x = i * spacing;
-                    const z = k * spacing;
+                    const x = i * boundarySpacing;
+                    const z = k * boundarySpacing;
                     particles.push(new Particle([x, y, z], 'boundary'));
                 }
             }
         }
         // Top (y positive)
         for (let l = 0; l < num_layers; l++) {
-            const y = BOX_SIZE.y + (l + 1) * spacing;
-            const nx = Math.floor(BOX_SIZE.x / spacing) + 1;
-            const nz = Math.floor(BOX_SIZE.z / spacing) + 1;
+            const y = BOX_SIZE.y + (l + 1) * boundarySpacing;
+            const nx = Math.floor(BOX_SIZE.x / boundarySpacing) + 1;
+            const nz = Math.floor(BOX_SIZE.z / boundarySpacing) + 1;
             for (let i = 0; i < nx; i++) {
                 for (let k = 0; k < nz; k++) {
-                    const x = i * spacing;
-                    const z = k * spacing;
+                    const x = i * boundarySpacing;
+                    const z = k * boundarySpacing;
                     particles.push(new Particle([x, y, z], 'boundary'));
                 }
             }
         }
         // Left (x negative)
         for (let l = 0; l < num_layers; l++) {
-            const x = - (l + 1) * spacing;
-            const ny_b = Math.floor(BOX_SIZE.y / spacing) + 1 + num_layers * 2; // extend up and down
-            const nz = Math.floor(BOX_SIZE.z / spacing) + 1;
+            const x = - (l + 1) * boundarySpacing;
+            const ny_b = Math.floor(BOX_SIZE.y / boundarySpacing) + 1 + num_layers * 2; // extend up and down
+            const nz = Math.floor(BOX_SIZE.z / boundarySpacing) + 1;
             for (let j = -num_layers; j < ny_b - num_layers; j++) {
                 for (let k = 0; k < nz; k++) {
-                    const y = j * spacing;
-                    const z = k * spacing;
+                    const y = j * boundarySpacing;
+                    const z = k * boundarySpacing;
                     particles.push(new Particle([x, y, z], 'boundary'));
                 }
             }
         }
         // Right (x positive)
         for (let l = 0; l < num_layers; l++) {
-            const x = BOX_SIZE.x + (l + 1) * spacing;
-            const ny_b = Math.floor(BOX_SIZE.y / spacing) + 1 + num_layers * 2;
-            const nz = Math.floor(BOX_SIZE.z / spacing) + 1;
+            const x = BOX_SIZE.x + (l + 1) * boundarySpacing;
+            const ny_b = Math.floor(BOX_SIZE.y / boundarySpacing) + 1 + num_layers * 2;
+            const nz = Math.floor(BOX_SIZE.z / boundarySpacing) + 1;
             for (let j = -num_layers; j < ny_b - num_layers; j++) {
                 for (let k = 0; k < nz; k++) {
-                    const y = j * spacing;
-                    const z = k * spacing;
+                    const y = j * boundarySpacing;
+                    const z = k * boundarySpacing;
                     particles.push(new Particle([x, y, z], 'boundary'));
                 }
             }
         }
         // Front (z negative)
         for (let l = 0; l < num_layers; l++) {
-            const z = - (l + 1) * spacing;
-            const nx = Math.floor(BOX_SIZE.x / spacing) + 1;
-            const ny_b = Math.floor(BOX_SIZE.y / spacing) + 1 + num_layers * 2;
+            const z = - (l + 1) * boundarySpacing;
+            const nx = Math.floor(BOX_SIZE.x / boundarySpacing) + 1;
+            const ny_b = Math.floor(BOX_SIZE.y / boundarySpacing) + 1 + num_layers * 2;
             for (let i = 0; i < nx; i++) {
                 for (let j = -num_layers; j < ny_b - num_layers; j++) {
-                    const x = i * spacing;
-                    const y = j * spacing;
+                    const x = i * boundarySpacing;
+                    const y = j * boundarySpacing;
                     particles.push(new Particle([x, y, z], 'boundary'));
                 }
             }
         }
         // Back (z positive)
         for (let l = 0; l < num_layers; l++) {
-            const z = BOX_SIZE.z + (l + 1) * spacing;
-            const nx = Math.floor(BOX_SIZE.x / spacing) + 1;
-            const ny_b = Math.floor(BOX_SIZE.y / spacing) + 1 + num_layers * 2;
+            const z = BOX_SIZE.z + (l + 1) * boundarySpacing;
+            const nx = Math.floor(BOX_SIZE.x / boundarySpacing) + 1;
+            const ny_b = Math.floor(BOX_SIZE.y / boundarySpacing) + 1 + num_layers * 2;
             for (let i = 0; i < nx; i++) {
                 for (let j = -num_layers; j < ny_b - num_layers; j++) {
-                    const x = i * spacing;
-                    const y = j * spacing;
+                    const x = i * boundarySpacing;
+                    const y = j * boundarySpacing;
                     particles.push(new Particle([x, y, z], 'boundary'));
                 }
             }
