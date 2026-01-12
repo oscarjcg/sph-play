@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import './App.css'; // Or your styles file
 import { SPH3D, BOX_SIZE } from './SPH3D';
+import { ThreeScene2D } from './ThreeScene2D';
 
 function ThreeScene3D() {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -250,6 +251,7 @@ function ThreeScene3D() {
 export default function App() {
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
+    
       <ThreeScene3D />
     </div>
   );
