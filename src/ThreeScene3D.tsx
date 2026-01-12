@@ -79,7 +79,7 @@ export function ThreeScene3D() {
 
     // Create points for fluid particles
     const geometry = new THREE.BufferGeometry();
-    
+
     const posArray = new Float32Array(fluidParticles.length * 3);
     for (let i = 0; i < fluidParticles.length; i++) {
       posArray[i * 3] = fluidParticles[i].r.x;
@@ -169,7 +169,7 @@ export function ThreeScene3D() {
         colors[i * 3 + 1] = g;
         colors[i * 3 + 2] = b;
       }
-     
+
       geometry.attributes.position.needsUpdate = true;
       geometry.attributes.color.needsUpdate = true;
 
@@ -178,7 +178,7 @@ export function ThreeScene3D() {
 
       controls.update();
       renderer.render(scene, camera);
-    
+
       // FPS calculation
       frameCount++;
       const now = performance.now();
@@ -233,11 +233,11 @@ export function ThreeScene3D() {
       <button style={{ position: 'absolute', zIndex: 10, top: '10px', left: '100px' }} onClick={() => setResetTrigger(prev => prev + 1)}>
         Reset
       </button>
-      <input 
-        type="number" 
-        value={tempN} 
-        onChange={(e) => setTempN(e.target.value)} 
-        style={{ position: 'absolute', zIndex: 10, top: '50px', left: '10px' }} 
+      <input
+        type="number"
+        value={tempN}
+        onChange={(e) => setTempN(e.target.value)}
+        style={{ position: 'absolute', zIndex: 10, top: '50px', left: '10px' }}
       />
       <button style={{ position: 'absolute', zIndex: 10, top: '50px', left: '100px' }} onClick={handleApplyN}>
         Apply N
