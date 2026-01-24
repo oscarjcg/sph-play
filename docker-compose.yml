@@ -1,0 +1,11 @@
+services:
+  sph-basic:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    container_name: sph-basic
+    volumes:
+      - .:/usr/src/sph-basic
+    command: npm run dev -- --host
