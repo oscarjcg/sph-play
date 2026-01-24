@@ -1,7 +1,7 @@
 import './App.css'; // Or your styles file
 
 import { ThreeScene2D } from './ThreeScene2D';
-import { ThreeScene3D } from './ThreeScene3D';
+//import { ThreeScene3D } from './ThreeScene3D';
 
 
 export default function App() {

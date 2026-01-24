@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { SPH3D, BOX_SIZE } from './SPH3D';
 
 export function ThreeScene3D() {
@@ -130,7 +130,7 @@ export function ThreeScene3D() {
       alphaTest: 0.5, // Cuts off square edges for round shape
       color: 0x000000 // Black for boundaries
     });
-    const pointsBoundary = new THREE.Points(geometryBoundary, materialBoundary);
+    //const pointsBoundary = new THREE.Points(geometryBoundary, materialBoundary);
     //scene.add(pointsBoundary);
 
     // Animation loop
