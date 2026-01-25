@@ -4,7 +4,7 @@ import * as THREE from 'three';
 // Constants
 let N = 50; // Use state N
 const RHO0 = 1000.0; // Rest density
-const BOX_SIZE = new THREE.Vector2(0.5, 0.5); // Simulation box
+export let BOX_SIZE = new THREE.Vector2(2.5, 2.5); // Simulation box
 const GRAV = new THREE.Vector2(0.0, -9.81); // Gravity
 const DT = 0.0003;
 const C = 20.0; // Speed of sound (lower for softer water)
@@ -39,8 +39,9 @@ export class Particle {
 
 export class SPH2D {
 
-    constructor(n: number) {
+    constructor(n: number, box: THREE.Vector2) {
         N = n;
+        BOX_SIZE = box
         spacing = Math.sqrt(BOX_SIZE.x * BOX_SIZE.y * 0.5 / N);
         M = RHO0 * spacing ** 2;
     }

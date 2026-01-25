@@ -1,7 +1,8 @@
 import { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
+import { Box, Button, TextField, Typography, Stack, Checkbox } from '@mui/material';
 
-import { SPH2D } from './SPH2D'
+import { SPH2D, BOX_SIZE } from './SPH2D'
 
 
 export function ThreeScene2D() {
@@ -10,10 +11,14 @@ export function ThreeScene2D() {
     const [resetTrigger, setResetTrigger] = useState(0);
     const [numParticles, setNumParticles] = useState(50); // Initial N
     const [tempN, setTempN] = useState(numParticles.toString()); // For input
+    const [tempScale, setTempScale] = useState("1");
+    const [tempBoxX, setTempBoxX] = useState("1.5");
+    const [tempBoxY, setTempBoxY] = useState("1.5");
+    const [tempControls, setTempControls] = useState(true);
     const pausedRef = useRef(isPaused);
     const [fps, setFps] = useState(0);
 
-    const SCALE_PIXELS = 5;
+    let SCALE_PIXELS = parseFloat(tempScale);
     const BALL_SIZE = 5;
 
     useEffect(() => {
@@ -27,8 +32,9 @@ export function ThreeScene2D() {
         // Max expected speed for color normalization (adjust based on your sim)
         const MAX_SPEED = 1.0; // Tune this; observe console logs for actual max speeds
 
+        handleApplyTemp()
 
-        let sph = new SPH2D(numParticles);
+        let sph = new SPH2D(numParticles, new THREE.Vector2(handleApplyTempBoxX(), handleApplyTempBoxY()));
         let particles = sph.createParticles();
 
         function generateCircleTexture() {
@@ -48,7 +54,8 @@ export function ThreeScene2D() {
         const axesHelper = new THREE.AxesHelper(5);
         scene.add(axesHelper);
 
-        // Camera
+        // Camera 
+        // TODO Change to orthographic
         const camera = new THREE.PerspectiveCamera(
             75,
             mount.clientWidth / mount.clientHeight,
@@ -196,36 +203,143 @@ export function ThreeScene2D() {
             material.dispose();
             renderer.dispose();
         };
-    }, [resetTrigger, numParticles]); // Re-run effect on reset or N change
+    }, [resetTrigger]); // Re-run effect on reset
 
-    const handleApplyN = () => {
+    const handleApplyTemp = () => {
         const newN = parseInt(tempN, 10);
         if (!isNaN(newN) && newN > 0) {
             setNumParticles(newN);
-            setResetTrigger(prev => prev + 1); // Trigger reset
+        }
+    };
+
+    const handleApplyTempBoxX = () => {
+        const newX = parseFloat(tempBoxX);
+        if (!isNaN(newX) && newX > 0) {
+            return newX
+        } else {
+            return 1
+        }
+    };
+
+    const handleApplyTempBoxY = () => {
+        const newY = parseFloat(tempBoxY);
+        if (!isNaN(newY) && newY > 0) {
+            return newY
+        } else {
+            return 1
         }
     };
 
     return (
-        <div ref={mountRef} style={{ width: '100%', height: '100%' }}>
-            <div style={{ position: 'absolute', zIndex: 10, top: '10px', right: '10px' }}>
+        <Box ref={mountRef} sx={{ width: '100%', height: '100%', position: 'relative' }}>
+            <Typography
+                sx={{ position: 'absolute', zIndex: 10, top: '10px', right: '10px', color: 'text.primary' }}
+            >
                 FPS: {fps}
-            </div>
-            <button style={{ position: 'absolute', zIndex: 10, top: '10px', left: '10px' }} onClick={() => setIsPaused(!isPaused)}>
-                {isPaused ? 'Resume' : 'Pause'}
-            </button>
-            <button style={{ position: 'absolute', zIndex: 10, top: '10px', left: '100px' }} onClick={() => setResetTrigger(prev => prev + 1)}>
-                Reset
-            </button>
-            <input
-                type="number"
-                value={tempN}
-                onChange={(e) => setTempN(e.target.value)}
-                style={{ position: 'absolute', zIndex: 10, top: '50px', left: '10px' }}
-            />
-            <button style={{ position: 'absolute', zIndex: 10, top: '50px', left: '100px' }} onClick={handleApplyN}>
-                Apply N
-            </button>
-        </div>
+            </Typography>
+
+            <Stack direction="column" spacing={2} sx={{ position: 'absolute', zIndex: 10, top: '50px', left: '10px' }}>
+                <Stack direction="row" spacing={2} alignItems="center">
+                    <Typography
+                        sx={{ color: 'text.primary' }}
+                    >
+                        UI:
+                    </Typography>
+                    <Checkbox
+                        checked={tempControls}
+                        onChange={(e) => setTempControls(e.target.checked)}
+                        color="primary"
+                    />
+                </Stack>
+
+                <Stack direction="column" spacing={2} sx={{ display: tempControls ? 'flex' : 'none' }}>
+                    {/* Buttons */}
+                    <Stack direction="row" spacing={2} alignItems="center">
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            sx={{ zIndex: 10 }}
+                            onClick={() => setIsPaused(!isPaused)}
+                        >
+                            {isPaused ? 'Resume' : 'Pause'}
+                        </Button>
+                        <Button
+                            variant="contained"
+                            color="secondary"
+                            sx={{ zIndex: 10 }}
+                            onClick={() => setResetTrigger(prev => prev + 1)}
+                        >
+                            Reset
+                        </Button>
+                    </Stack>
+
+                    {/* N Particules */}
+                    <Stack direction="row" spacing={2} alignItems="center">
+                        <Typography
+                            sx={{ color: 'text.primary' }}
+                        >
+                            N:
+                        </Typography>
+                        <TextField
+                            type="number"
+                            value={tempN}
+                            onChange={(e) => setTempN(e.target.value)}
+                            variant="outlined"
+                            size="small"
+                            sx={{ color: 'text.primary' }}
+                        />
+                    </Stack>
+
+                    <Stack direction="row" spacing={2} alignItems="center">
+                        <Typography
+                            sx={{ color: 'text.primary' }}
+                        >
+                            Scale:
+                        </Typography>
+                        <TextField
+                            type="number"
+                            value={tempScale}
+                            onChange={(e) => setTempScale(e.target.value)}
+                            variant="outlined"
+                            size="small"
+                            sx={{ color: 'text.primary' }}
+                        />
+                    </Stack>
+
+                    {/* Box */}
+                    <Stack direction="row" spacing={2} alignItems="center">
+                        <Typography
+                            sx={{ color: 'text.primary' }}
+                        >
+                            Box X:
+                        </Typography>
+                        <TextField
+                            type="number"
+                            value={tempBoxX}
+                            onChange={(e) => setTempBoxX(e.target.value)}
+                            variant="outlined"
+                            size="small"
+                            sx={{ color: 'text.primary' }}
+                        />
+                    </Stack>
+                    <Stack direction="row" spacing={2} alignItems="center">
+                        <Typography
+                            sx={{ color: 'text.primary' }}
+                        >
+                            Box Y:
+                        </Typography>
+                        <TextField
+                            type="number"
+                            value={tempBoxY}
+                            onChange={(e) => setTempBoxY(e.target.value)}
+                            variant="outlined"
+                            size="small"
+                            sx={{ color: 'text.primary' }}
+                        />
+
+                    </Stack>
+                </Stack>
+            </Stack>
+        </Box>
     );
 }
