@@ -1,27 +1,25 @@
 import * as THREE from 'three';
 
 
-// Constants
-let N = 50; // Use state N
+let N = 50;
 const RHO0 = 1000.0; // Rest density
-export let BOX_SIZE = new THREE.Vector2(2.5, 2.5); // Simulation box
-const GRAV = new THREE.Vector2(0.0, -9.81); // Gravity
-const DT = 0.0003;
-const C = 20.0; // Speed of sound (lower for softer water)
-const K = C ** 2 * RHO0; // Stiffness constant for state equation p = K * (rho / RHO0 - 1)
+export let BOX_SIZE = new THREE.Vector2(2.5, 2.5);
+const GRAV = new THREE.Vector2(0.0, -9.81);
+const DT = 0.0003; // TODO Dynamic
+const C = 20.0; // Speed of sound
+const K = C ** 2 * RHO0; // Stiffness constant for state equation
 const VISC = 0.5; // Viscosity
 
-const H = 0.03; // Smoothing radius (tune based on spacing)
-const CELL_SIZE = H; // For spatial grid
+const H = 0.03; // Smoothing radius
+const CELL_SIZE = H; // Spatial grid
 
 let spacing = Math.sqrt(BOX_SIZE.x * BOX_SIZE.y * 0.5 / N);
 let boundarySpacing = Math.sqrt(BOX_SIZE.x * BOX_SIZE.y * 0.5 / N);
-let M = RHO0 * spacing ** 2; // Mass per particle 
+let M = RHO0 * spacing ** 2; // Mass
 
 // Spatial grid for efficient neighbor search
 type Grid = Map<string, number[]>;
 
-// Particle class
 export class Particle {
     r: THREE.Vector2;
     v: THREE.Vector2;
@@ -48,7 +46,6 @@ export class SPH2D {
         M = RHO0 * spacing ** 2;
     }
 
-    // Function to create initial particles
     createParticles() {
         const particles: Particle[] = [];
 
@@ -70,7 +67,7 @@ export class SPH2D {
             }
         }
 
-        // Add boundary particles (1 layer for bottom, top, left, right)
+        // Boundary particles
         const num_layers = 1;
         // Bottom
         for (let k = 0; k < num_layers; k++) {
@@ -91,7 +88,7 @@ export class SPH2D {
             }
         }
 
-        const ny_b = Math.floor(BOX_SIZE.y / boundarySpacing) + 1 + num_layers; // extend up and down
+        const ny_b = Math.floor(BOX_SIZE.y / boundarySpacing) + 1 + num_layers;
         // Left
         for (let k = 0; k < num_layers; k++) {
             const x = - (k + 1) * boundarySpacing;
@@ -111,7 +108,6 @@ export class SPH2D {
         return particles;
     }
 
-    // Kernel functions (cubic spline from PDF, 2D)
     kernel(r: THREE.Vector2, h: number): number {
         const rn = r.length();
         const q = rn / h;
@@ -172,7 +168,6 @@ export class SPH2D {
         return neighbors;
     }
 
-    // Compute densities
     compute_densities(particles: Particle[], h: number, m: number, grid: Grid, cell_size: number): void {
         for (let i = 0; i < particles.length; i++) {
             let rho = m * this.kernel(new THREE.Vector2(0, 0), h); // Self-contribution
@@ -184,7 +179,6 @@ export class SPH2D {
         }
     }
 
-    // Compute pressures using state equation
     compute_pressures(particles: Particle[], rho0: number, k: number): void {
         for (const p of particles) {
             p.p = k * (p.rho / rho0 - 1.0);
@@ -196,12 +190,11 @@ export class SPH2D {
         this.step(particles, DT, H, M, VISC, RHO0, K, GRAV);
     }
 
-    // Simulation step following Algorithm 1
     step(particles: Particle[], dt: number, h: number, m: number, visc: number, rho0: number, k: number, grav: THREE.Vector2): void {
         const grid = this.build_grid(particles, CELL_SIZE);
         // Reconstruct densities
         this.compute_densities(particles, h, m, grid, CELL_SIZE);
-        // Compute viscosity forces (only for fluid particles)
+        // Viscosity force
         const Fvisc: THREE.Vector2[] = particles.map(() => new THREE.Vector2(0, 0));
         for (let i = 0; i < particles.length; i++) {
             if (particles[i].type !== 'fluid') continue;
@@ -216,9 +209,9 @@ export class SPH2D {
                 const term = particles[j].v.clone().sub(particles[i].v).multiplyScalar((m / particles[j].rho) * 2.0 * gw_norm / rn);
                 lap_v.add(term);
             }
-            Fvisc[i] = lap_v.multiplyScalar(visc * m); // F = m * visc * lap_v
+            Fvisc[i] = lap_v.multiplyScalar(visc * m);
         }
-        // Compute intermediate velocities v*
+        // Intermediate velocities
         const v_star: THREE.Vector2[] = [];
         for (let i = 0; i < particles.length; i++) {
             if (particles[i].type !== 'fluid') {
@@ -229,9 +222,10 @@ export class SPH2D {
             const accel = Fvisc[i].clone().add(Fext_i).multiplyScalar(dt / m);
             v_star[i] = particles[i].v.clone().add(accel);
         }
-        // Compute pressures
+        // Pressures
         this.compute_pressures(particles, rho0, k);
-        // Compute pressure forces (only for fluid particles)
+        // Pressure forces
+        // TODO Creating several arrays on each step, triggering garbage collection, reuse arrays
         const Fpress: THREE.Vector2[] = particles.map(() => new THREE.Vector2(0, 0));
         for (let i = 0; i < particles.length; i++) {
             if (particles[i].type !== 'fluid') continue;
@@ -244,9 +238,9 @@ export class SPH2D {
                 gradp.add(gradW.multiplyScalar(term));
             }
             const a_press = gradp.negate();
-            Fpress[i] = a_press.multiplyScalar(m); // F = m * a_press
+            Fpress[i] = a_press.multiplyScalar(m);
         }
-        // Update velocities and positions for fluid particles
+        // Update velocities and positions
         for (let i = 0; i < particles.length; i++) {
             if (particles[i].type !== 'fluid') {
                 console.log("set v 0 0 " + particles[i].type)
@@ -258,6 +252,5 @@ export class SPH2D {
             const dr = particles[i].v.clone().multiplyScalar(dt);
             particles[i].r.add(dr);
         }
-        // No need for reflection boundaries since we have boundary particles
     }
 }
