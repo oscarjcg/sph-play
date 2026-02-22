@@ -10,8 +10,8 @@ export function ThreeScene2D() {
     const mountRef = useRef<HTMLDivElement>(null);
     const [isPaused, setIsPaused] = useState(false);
     const [resetTrigger, setResetTrigger] = useState(0);
-    const [numParticles, setNumParticles] = useState(50); // Initial N
-    const [tempN, setTempN] = useState(numParticles.toString()); // For input
+    const [numParticles, setNumParticles] = useState(50); 
+    const [tempN, setTempN] = useState(numParticles.toString());
     const [tempScale, setTempScale] = useState("1");
     const [tempBoxX, setTempBoxX] = useState("1.5");
     const [tempBoxY, setTempBoxY] = useState("1.5");
@@ -32,9 +32,8 @@ export function ThreeScene2D() {
         const mount = mountRef.current;
         if (!mount) return;
 
-        // Max expected speed for color normalization (adjust based on your sim)
-        const MAX_SPEED = 1.0; // Tune this; observe console logs for actual max speeds
-
+        // Color normalization
+        const MAX_SPEED = 1.0;
         handleApplyTemp()
 
         let box = new THREE.Vector2(handleApplyTempBoxX(), handleApplyTempBoxY());
@@ -48,7 +47,7 @@ export function ThreeScene2D() {
             const ctx = canvas.getContext('2d')!;
             ctx.beginPath();
             ctx.arc(16, 16, 16, 0, Math.PI * 2);
-            ctx.fillStyle = '#ffffff'; // White for alpha mapping
+            ctx.fillStyle = '#ffffff';
             ctx.fill();
             return new THREE.CanvasTexture(canvas);
         }
@@ -84,10 +83,10 @@ export function ThreeScene2D() {
         // Renderer
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(mount.clientWidth, mount.clientHeight);
-        renderer.setClearColor(0x87CEEB); // Sky blue
+        renderer.setClearColor(0x87CEEB);
         mount.appendChild(renderer.domElement);
 
-        // Filter fluid particles for visualization
+        // Filter fluid particles
         let fluidParticles = particles.filter(p => p.type === 'fluid');
 
         // Create points for fluid particles
@@ -101,25 +100,24 @@ export function ThreeScene2D() {
         }
         geometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
 
-        // Add color attribute
+        // Color attribute
         const colorsArray = new Float32Array(fluidParticles.length * 3);
         for (let i = 0; i < fluidParticles.length; i++) {
-            // Initial color (e.g., blue)
-            colorsArray[i * 3] = 0; // R
-            colorsArray[i * 3 + 1] = 0; // G
-            colorsArray[i * 3 + 2] = 1; // B
+            colorsArray[i * 3] = 0;
+            colorsArray[i * 3 + 1] = 0;
+            colorsArray[i * 3 + 2] = 1;
         }
         geometry.setAttribute('color', new THREE.BufferAttribute(colorsArray, 3));
 
         //const material = new THREE.PointsMaterial({ size: BALL_SIZE, sizeAttenuation: false, color: 0x0000ff }); // Size in pixels
         const circleTexture = generateCircleTexture();
         const material = new THREE.PointsMaterial({
-            size: BALL_SIZE, // Pixel size
+            size: BALL_SIZE, 
             sizeAttenuation: false,
             map: circleTexture,
             transparent: true,
-            alphaTest: 0.5, // Cuts off square edges for round shape
-            vertexColors: true // Enable per-particle colors
+            alphaTest: 0.5,
+            vertexColors: true
         });
         const points = new THREE.Points(geometry, material);
         scene.add(points);
@@ -127,7 +125,7 @@ export function ThreeScene2D() {
         // Filter boundary particules
         const boundaryParticles = particles.filter(p => p.type === 'boundary');
 
-        // Create boundary particules for visualization
+        // Create boundary particules
         const geometryBoundary = new THREE.BufferGeometry();
         const posArrayBoundary = new Float32Array(boundaryParticles.length * 3);
         for (let i = 0; i < boundaryParticles.length; i++) {
@@ -142,8 +140,8 @@ export function ThreeScene2D() {
             sizeAttenuation: false,
             map: circleTexture,
             transparent: true,
-            alphaTest: 0.5, // Cuts off square edges for round shape
-            color: 0x000000 // Blue tint
+            alphaTest: 0.5,
+            color: 0x000000 
         });
         const pointsBoundary = new THREE.Points(geometryBoundary, materialBoundary);
         scene.add(pointsBoundary);
@@ -159,14 +157,14 @@ export function ThreeScene2D() {
                 sph.stepAll(particles);
             }
 
-            // Update positions (only fluid)
+            // Update positions
             const pos = geometry.attributes.position.array as Float32Array;
             const colors = geometry.attributes.color.array as Float32Array;
             for (let i = 0; i < fluidParticles.length; i++) {
                 pos[i * 3] = fluidParticles[i].r.x * SCALE_PIXELS;
                 pos[i * 3 + 1] = fluidParticles[i].r.y * SCALE_PIXELS;
 
-                // Update color based on velocity magnitude (blue slow -> green medium -> red fast)
+                // Update velocity color
                 const speed = fluidParticles[i].v.length();
                 const normalized = Math.min(speed / MAX_SPEED, 1);
                 let r = 0, g = 0, b = 0;
@@ -192,7 +190,7 @@ export function ThreeScene2D() {
 
             renderer.render(scene, camera);
 
-            // FPS calculation
+            // FPS
             frameCount++;
             const now = performance.now();
             if (now - lastTime >= 1000) {
@@ -203,14 +201,14 @@ export function ThreeScene2D() {
         };
         animate();
 
-        // Resize handler
+        // Resize
         const handleResize = () => {
             camera.updateProjectionMatrix();
             renderer.setSize(mount.clientWidth, mount.clientHeight);
         };
         window.addEventListener('resize', handleResize);
 
-        // Cleanup on unmount
+        // Cleanup
         return () => {
             window.removeEventListener('resize', handleResize);
             cancelAnimationFrame(animationFrameId);
@@ -219,7 +217,7 @@ export function ThreeScene2D() {
             material.dispose();
             renderer.dispose();
         };
-    }, [resetTrigger]); // Re-run effect on reset
+    }, [resetTrigger]);
 
     const handleApplyTemp = () => {
         const newN = parseInt(tempN, 10);
