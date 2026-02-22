@@ -2,6 +2,8 @@ import { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { SPH3D, BOX_SIZE } from './SPH3D';
+import { Box } from '@mui/material';
+import { UIControls } from './UIControls'
 
 export function ThreeScene3D() {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -9,11 +11,16 @@ export function ThreeScene3D() {
   const [resetTrigger, setResetTrigger] = useState(0);
   const [numParticles, setNumParticles] = useState(5000); // Increased for 3D
   const [tempN, setTempN] = useState(numParticles.toString()); // For input
+  const [tempScale, setTempScale] = useState("0.5");
+  const [tempBoxX, setTempBoxX] = useState("0.5");
+  const [tempBoxY, setTempBoxY] = useState("0.5");
+  const [tempBoxZ, setTempBoxZ] = useState("0.5");
+  const [tempControls, setTempControls] = useState(true);
   const pausedRef = useRef(isPaused);
   const [fps, setFps] = useState(0);
 
-  let sph = new SPH3D(numParticles, 0.02)
-
+  
+  let SCALE_PIXELS = parseFloat(tempScale);
 
   useEffect(() => {
     pausedRef.current = isPaused;
@@ -23,11 +30,15 @@ export function ThreeScene3D() {
     const mount = mountRef.current;
     if (!mount) return;
 
-    const SCALE_PIXELS = 1;
     const BALL_SIZE = 5;
 
     // Max expected speed for color normalization (adjust based on your sim)
     const MAX_SPEED = 1.0; // Tune this; observe console logs for actual max speeds
+
+    handleApplyTemp()
+
+    let box = new THREE.Vector3(handleApplyTempBoxX(), handleApplyTempBoxY(), handleApplyTempBoxZ())
+    let sph = new SPH3D(numParticles, box ,0.02)
 
     let particles = sph.createParticles();
 
@@ -49,11 +60,11 @@ export function ThreeScene3D() {
     scene.add(axesHelper);
 
     // Add boundary box lines
-    const boxGeometry = new THREE.BoxGeometry(BOX_SIZE.x, BOX_SIZE.y, BOX_SIZE.z);
+    const boxGeometry = new THREE.BoxGeometry(BOX_SIZE.x * SCALE_PIXELS, BOX_SIZE.y * SCALE_PIXELS, BOX_SIZE.z * SCALE_PIXELS);
     const edges = new THREE.EdgesGeometry(boxGeometry);
     const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
     const boxLines = new THREE.LineSegments(edges, lineMaterial);
-    boxLines.position.set(BOX_SIZE.x / 2, BOX_SIZE.y / 2, BOX_SIZE.z / 2);
+    boxLines.position.set(BOX_SIZE.x * SCALE_PIXELS / 2, BOX_SIZE.y * SCALE_PIXELS / 2, BOX_SIZE.z * SCALE_PIXELS / 2);
     scene.add(boxLines);
 
     // Camera
@@ -214,34 +225,60 @@ export function ThreeScene3D() {
     };
   }, [resetTrigger, numParticles]); // Re-run effect on reset or N change
 
-  const handleApplyN = () => {
-    const newN = parseInt(tempN, 10);
-    if (!isNaN(newN) && newN > 0) {
-      setNumParticles(newN);
-      setResetTrigger(prev => prev + 1); // Trigger reset
-    }
+  const handleApplyTemp = () => {
+      const newN = parseInt(tempN, 10);
+      if (!isNaN(newN) && newN > 0) {
+          setNumParticles(newN);
+      }
   };
 
+  const handleApplyTempBoxX = () => {
+        const newX = parseFloat(tempBoxX);
+        if (!isNaN(newX) && newX > 0) {
+            return newX
+        } else {
+            return 1
+        }
+    };
+
+    const handleApplyTempBoxY = () => {
+        const newY = parseFloat(tempBoxY);
+        if (!isNaN(newY) && newY > 0) {
+            return newY
+        } else {
+            return 1
+        }
+    };
+
+    const handleApplyTempBoxZ = () => {
+        const newZ = parseFloat(tempBoxZ);
+        if (!isNaN(newZ) && newZ > 0) {
+            return newZ
+        } else {
+            return 1
+        }
+    };
+
   return (
-    <div ref={mountRef} style={{ width: '100%', height: '100%' }}>
-      <div style={{ position: 'absolute', zIndex: 10, top: '10px', right: '10px' }}>
-        FPS: {fps}
-      </div>
-      <button style={{ position: 'absolute', zIndex: 10, top: '10px', left: '10px' }} onClick={() => setIsPaused(!isPaused)}>
-        {isPaused ? 'Resume' : 'Pause'}
-      </button>
-      <button style={{ position: 'absolute', zIndex: 10, top: '10px', left: '100px' }} onClick={() => setResetTrigger(prev => prev + 1)}>
-        Reset
-      </button>
-      <input
-        type="number"
-        value={tempN}
-        onChange={(e) => setTempN(e.target.value)}
-        style={{ position: 'absolute', zIndex: 10, top: '50px', left: '10px' }}
-      />
-      <button style={{ position: 'absolute', zIndex: 10, top: '50px', left: '100px' }} onClick={handleApplyN}>
-        Apply N
-      </button>
-    </div>
-  );
+          <Box ref={mountRef} sx={{ width: '100%', height: '100%', position: 'relative' }}>
+              <UIControls
+                  fps={fps}
+                  tempControls={tempControls}
+                  setTempControls={setTempControls}
+                  isPaused={isPaused}
+                  setIsPaused={setIsPaused}
+                  onReset={() => setResetTrigger(prev => prev + 1)}
+                  tempN={tempN}
+                  setTempN={setTempN}
+                  tempScale={tempScale}
+                  setTempScale={setTempScale}
+                  tempBoxX={tempBoxX}
+                  setTempBoxX={setTempBoxX}
+                  tempBoxY={tempBoxY}
+                  setTempBoxY={setTempBoxY}
+                  tempBoxZ={tempBoxZ}
+                  setTempBoxZ={setTempBoxZ}
+              />
+          </Box>
+      );
 }

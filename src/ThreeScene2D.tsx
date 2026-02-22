@@ -1,8 +1,9 @@
 import { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
-import { Box, Button, TextField, Typography, Stack, Checkbox } from '@mui/material';
+import { Box } from '@mui/material';
 
 import { SPH2D, BOX_SIZE } from './SPH2D'
+import { UIControls } from './UIControls'
 
 
 export function ThreeScene2D() {
@@ -14,6 +15,7 @@ export function ThreeScene2D() {
     const [tempScale, setTempScale] = useState("1");
     const [tempBoxX, setTempBoxX] = useState("1.5");
     const [tempBoxY, setTempBoxY] = useState("1.5");
+    const [tempBoxZ, setTempBoxZ] = useState("0"); // Not used
     const [tempControls, setTempControls] = useState(true);
     const pausedRef = useRef(isPaused);
     const [fps, setFps] = useState(0);
@@ -232,114 +234,24 @@ export function ThreeScene2D() {
 
     return (
         <Box ref={mountRef} sx={{ width: '100%', height: '100%', position: 'relative' }}>
-            <Typography
-                sx={{ position: 'absolute', zIndex: 10, top: '10px', right: '10px', color: 'text.primary' }}
-            >
-                FPS: {fps}
-            </Typography>
-
-            <Stack direction="column" spacing={2} sx={{ position: 'absolute', zIndex: 10, top: '50px', left: '10px' }}>
-                <Stack direction="row" spacing={2} alignItems="center">
-                    <Typography
-                        sx={{ color: 'text.primary' }}
-                    >
-                        UI:
-                    </Typography>
-                    <Checkbox
-                        checked={tempControls}
-                        onChange={(e) => setTempControls(e.target.checked)}
-                        color="primary"
-                    />
-                </Stack>
-
-                <Stack direction="column" spacing={2} sx={{ display: tempControls ? 'flex' : 'none' }}>
-                    {/* Buttons */}
-                    <Stack direction="row" spacing={2} alignItems="center">
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            sx={{ zIndex: 10 }}
-                            onClick={() => setIsPaused(!isPaused)}
-                        >
-                            {isPaused ? 'Resume' : 'Pause'}
-                        </Button>
-                        <Button
-                            variant="contained"
-                            color="secondary"
-                            sx={{ zIndex: 10 }}
-                            onClick={() => setResetTrigger(prev => prev + 1)}
-                        >
-                            Reset
-                        </Button>
-                    </Stack>
-
-                    {/* N Particules */}
-                    <Stack direction="row" spacing={2} alignItems="center">
-                        <Typography
-                            sx={{ color: 'text.primary' }}
-                        >
-                            N:
-                        </Typography>
-                        <TextField
-                            type="number"
-                            value={tempN}
-                            onChange={(e) => setTempN(e.target.value)}
-                            variant="outlined"
-                            size="small"
-                            sx={{ color: 'text.primary' }}
-                        />
-                    </Stack>
-
-                    <Stack direction="row" spacing={2} alignItems="center">
-                        <Typography
-                            sx={{ color: 'text.primary' }}
-                        >
-                            Scale:
-                        </Typography>
-                        <TextField
-                            type="number"
-                            value={tempScale}
-                            onChange={(e) => setTempScale(e.target.value)}
-                            variant="outlined"
-                            size="small"
-                            sx={{ color: 'text.primary' }}
-                        />
-                    </Stack>
-
-                    {/* Box */}
-                    <Stack direction="row" spacing={2} alignItems="center">
-                        <Typography
-                            sx={{ color: 'text.primary' }}
-                        >
-                            Box X:
-                        </Typography>
-                        <TextField
-                            type="number"
-                            value={tempBoxX}
-                            onChange={(e) => setTempBoxX(e.target.value)}
-                            variant="outlined"
-                            size="small"
-                            sx={{ color: 'text.primary' }}
-                        />
-                    </Stack>
-                    <Stack direction="row" spacing={2} alignItems="center">
-                        <Typography
-                            sx={{ color: 'text.primary' }}
-                        >
-                            Box Y:
-                        </Typography>
-                        <TextField
-                            type="number"
-                            value={tempBoxY}
-                            onChange={(e) => setTempBoxY(e.target.value)}
-                            variant="outlined"
-                            size="small"
-                            sx={{ color: 'text.primary' }}
-                        />
-
-                    </Stack>
-                </Stack>
-            </Stack>
+            <UIControls
+                fps={fps}
+                tempControls={tempControls}
+                setTempControls={setTempControls}
+                isPaused={isPaused}
+                setIsPaused={setIsPaused}
+                onReset={() => setResetTrigger(prev => prev + 1)}
+                tempN={tempN}
+                setTempN={setTempN}
+                tempScale={tempScale}
+                setTempScale={setTempScale}
+                tempBoxX={tempBoxX}
+                setTempBoxX={setTempBoxX}
+                tempBoxY={tempBoxY}
+                setTempBoxY={setTempBoxY}
+                tempBoxZ={tempBoxZ}
+                setTempBoxZ={setTempBoxZ}
+            />
         </Box>
     );
 }

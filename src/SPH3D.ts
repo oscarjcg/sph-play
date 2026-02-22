@@ -3,7 +3,7 @@ import * as THREE from 'three';
 // Constants
 let N = 100; // Use state N
 const RHO0 = 1000.0; // Rest density
-export const BOX_SIZE = new THREE.Vector3(0.5, 0.5, 0.5); // Simulation box (adjusted for visibility)
+export let BOX_SIZE = new THREE.Vector3(0.5, 0.5, 0.5); // Simulation box (adjusted for visibility)
 const GRAV = new THREE.Vector3(0.0, -9.81, 0.0); // Gravity
 const DT = 0.0003; // TODO Dynamic
 const C = 20.0; // Speed of sound (lower for softer water)
@@ -19,10 +19,10 @@ let M = RHO0 * spacing ** 3; // Mass per particle
 
 // Particle class
 export class Particle {
-    r: THREE.Vector3;
-    v: THREE.Vector3;
-    rho: number;
-    p: number;
+    r: THREE.Vector3; // Position
+    v: THREE.Vector3; // Velocity
+    rho: number; // Density
+    p: number; // Pressure
     type: 'fluid' | 'boundary';
 
     constructor(pos: [number, number, number], typ: 'fluid' | 'boundary' = 'fluid') {
@@ -37,8 +37,9 @@ export class Particle {
 type Grid = Map<string, number[]>;
 export class SPH3D {
 
-    constructor(n: number, bSpacing?: number) {
+    constructor(n: number, box: THREE.Vector3, bSpacing?: number, ) {
         N = n;
+        BOX_SIZE = box
         spacing = Math.pow(BOX_SIZE.x * BOX_SIZE.y * BOX_SIZE.z * 0.5 / N, 1 / 3);
         boundarySpacing = bSpacing ?? spacing
         M = RHO0 * spacing ** 3; // Mass per particle 

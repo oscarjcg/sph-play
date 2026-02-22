@@ -29,10 +29,10 @@ export class Particle {
     type: 'fluid' | 'boundary';
 
     constructor(pos: [number, number], typ: 'fluid' | 'boundary' = 'fluid') {
-        this.r = new THREE.Vector2(...pos);
-        this.v = new THREE.Vector2(0, 0);
-        this.rho = RHO0;
-        this.p = 0.0;
+        this.r = new THREE.Vector2(...pos); // Position
+        this.v = new THREE.Vector2(0, 0); // Velocity
+        this.rho = RHO0; // Density
+        this.p = 0.0; // Pressure
         this.type = typ;
     }
 }
