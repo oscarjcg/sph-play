@@ -57,14 +57,27 @@ export function ThreeScene2D() {
         scene.add(axesHelper);
 
         // Camera 
-        // TODO Change to orthographic
-        const camera = new THREE.PerspectiveCamera(
-            75,
-            mount.clientWidth / mount.clientHeight,
+        const width = mount.clientWidth;
+        const height = mount.clientHeight;
+        const aspect = width / height;
+
+        const viewSize = 4.0;
+        const halfHeight = viewSize / 2;
+        const halfWidth = halfHeight * aspect;
+
+        const camera = new THREE.OrthographicCamera(
+            -halfWidth,
+            halfWidth,
+            halfHeight,
+            -halfHeight,
             0.1,
-            1000
+            100
         );
-        camera.position.z = 5;
+        camera.position.set(0, 0, 10);
+        camera.lookAt(0, 0, 0);
+
+        camera.position.x = BOX_SIZE.x * SCALE_PIXELS / 2;
+        camera.position.y = BOX_SIZE.y * SCALE_PIXELS / 2;
 
         // Renderer
         const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -190,7 +203,6 @@ export function ThreeScene2D() {
 
         // Resize handler
         const handleResize = () => {
-            camera.aspect = mount.clientWidth / mount.clientHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(mount.clientWidth, mount.clientHeight);
         };
