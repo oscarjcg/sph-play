@@ -15,6 +15,7 @@ export function ThreeScene3D() {
   const [tempBoxX, setTempBoxX] = useState("0.5");
   const [tempBoxY, setTempBoxY] = useState("0.5");
   const [tempBoxZ, setTempBoxZ] = useState("0.5");
+  const [tempBoundarySpacing, setTempBoundarySpacing] = useState("0.02");
   const [tempControls, setTempControls] = useState(true);
   const pausedRef = useRef(isPaused);
   const [fps, setFps] = useState(0);
@@ -38,7 +39,7 @@ export function ThreeScene3D() {
     handleApplyTemp()
 
     let box = new THREE.Vector3(handleApplyTempBoxX(), handleApplyTempBoxY(), handleApplyTempBoxZ())
-    let sph = new SPH3D(numParticles, box ,0.02)
+    let sph = new SPH3D(numParticles, box , handleApplyTempBoundarySpacing())
 
     let particles = sph.createParticles();
 
@@ -241,23 +242,32 @@ export function ThreeScene3D() {
         }
     };
 
-    const handleApplyTempBoxY = () => {
-        const newY = parseFloat(tempBoxY);
-        if (!isNaN(newY) && newY > 0) {
-            return newY
-        } else {
-            return 1
-        }
-    };
+  const handleApplyTempBoxY = () => {
+      const newY = parseFloat(tempBoxY);
+      if (!isNaN(newY) && newY > 0) {
+          return newY
+      } else {
+          return 1
+      }
+  };
 
-    const handleApplyTempBoxZ = () => {
-        const newZ = parseFloat(tempBoxZ);
-        if (!isNaN(newZ) && newZ > 0) {
-            return newZ
-        } else {
-            return 1
-        }
-    };
+  const handleApplyTempBoxZ = () => {
+      const newZ = parseFloat(tempBoxZ);
+      if (!isNaN(newZ) && newZ > 0) {
+          return newZ
+      } else {
+          return 1
+      }
+  };
+
+  const handleApplyTempBoundarySpacing = () => {
+      const newSpacing = parseFloat(tempBoundarySpacing);
+      if (!isNaN(newSpacing) && newSpacing > 0) {
+          return newSpacing
+      } else {
+          return 0.02
+      }
+  };
 
   return (
           <Box ref={mountRef} sx={{ width: '100%', height: '100%', position: 'relative' }}>
@@ -278,6 +288,8 @@ export function ThreeScene3D() {
                   setTempBoxY={setTempBoxY}
                   tempBoxZ={tempBoxZ}
                   setTempBoxZ={setTempBoxZ}
+                  tempBoundarySpacing={tempBoundarySpacing}
+                  setTempBoundarySpacing={setTempBoundarySpacing}
               />
           </Box>
       );

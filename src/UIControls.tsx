@@ -17,6 +17,8 @@ export function UIControls({
     setTempBoxY,
     tempBoxZ,
     setTempBoxZ,
+    tempBoundarySpacing,
+    setTempBoundarySpacing
 }: {
     fps: number;
     tempControls: boolean;
@@ -34,6 +36,8 @@ export function UIControls({
     setTempBoxY: (v: string) => void;
     tempBoxZ: string;
     setTempBoxZ: (v: string) => void;
+    tempBoundarySpacing: string;
+    setTempBoundarySpacing: (v: string) => void;
 }) {
     return (
         <>
@@ -153,6 +157,22 @@ export function UIControls({
                             type="number"
                             value={tempBoxZ}
                             onChange={(e) => setTempBoxZ(e.target.value)}
+                            variant="outlined"
+                            size="small"
+                            sx={{ color: 'text.primary' }}
+                        />
+
+                    </Stack>
+                    <Stack direction="row" spacing={2} alignItems="center">
+                        <Typography
+                            sx={{ color: 'text.primary' }}
+                        >
+                            Boundary spacing:
+                        </Typography>
+                        <TextField
+                            type="number"
+                            value={tempBoundarySpacing}
+                            onChange={(e) => setTempBoundarySpacing(e.target.value)}
                             variant="outlined"
                             size="small"
                             sx={{ color: 'text.primary' }}

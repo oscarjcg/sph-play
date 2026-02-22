@@ -15,6 +15,7 @@ const H = 0.03; // Smoothing radius (tune based on spacing)
 const CELL_SIZE = H; // For spatial grid
 
 let spacing = Math.sqrt(BOX_SIZE.x * BOX_SIZE.y * 0.5 / N);
+let boundarySpacing = Math.sqrt(BOX_SIZE.x * BOX_SIZE.y * 0.5 / N);
 let M = RHO0 * spacing ** 2; // Mass per particle 
 
 // Spatial grid for efficient neighbor search
@@ -39,10 +40,11 @@ export class Particle {
 
 export class SPH2D {
 
-    constructor(n: number, box: THREE.Vector2) {
+    constructor(n: number, box: THREE.Vector2, bSpacing?: number) {
         N = n;
         BOX_SIZE = box
         spacing = Math.sqrt(BOX_SIZE.x * BOX_SIZE.y * 0.5 / N);
+        boundarySpacing = bSpacing ?? spacing
         M = RHO0 * spacing ** 2;
     }
 
@@ -72,37 +74,37 @@ export class SPH2D {
         const num_layers = 1;
         // Bottom
         for (let k = 0; k < num_layers; k++) {
-            const y = - (k + 1) * spacing;
-            const nx = Math.floor(BOX_SIZE.x / spacing) + 1;
+            const y = - (k + 1) * boundarySpacing;
+            const nx = Math.floor(BOX_SIZE.x / boundarySpacing) + 1;
             for (let i = 0; i < nx; i++) {
-                const x = i * spacing;
+                const x = i * boundarySpacing;
                 particles.push(new Particle([x, y], 'boundary'));
             }
         }
         // Top
         for (let k = 0; k < num_layers; k++) {
-            const y = BOX_SIZE.y + (k + 1) * spacing;
-            const nx = Math.floor(BOX_SIZE.x / spacing) + 1;
+            const y = BOX_SIZE.y + (k + 1) * boundarySpacing;
+            const nx = Math.floor(BOX_SIZE.x / boundarySpacing) + 1;
             for (let i = 0; i < nx; i++) {
-                const x = i * spacing;
+                const x = i * boundarySpacing;
                 particles.push(new Particle([x, y], 'boundary'));
             }
         }
 
-        const ny_b = Math.floor(BOX_SIZE.y / spacing) + 1 + num_layers; // extend up and down
+        const ny_b = Math.floor(BOX_SIZE.y / boundarySpacing) + 1 + num_layers; // extend up and down
         // Left
         for (let k = 0; k < num_layers; k++) {
-            const x = - (k + 1) * spacing;
+            const x = - (k + 1) * boundarySpacing;
             for (let j = -num_layers; j < ny_b; j++) {
-                const y = j * spacing;
+                const y = j * boundarySpacing;
                 particles.push(new Particle([x, y], 'boundary'));
             }
         }
         // Right
         for (let k = 0; k < num_layers; k++) {
-            const x = BOX_SIZE.x + (k + 1) * spacing;
+            const x = BOX_SIZE.x + (k + 1) * boundarySpacing;
             for (let j = -num_layers; j < ny_b; j++) {
-                const y = j * spacing;
+                const y = j * boundarySpacing;
                 particles.push(new Particle([x, y], 'boundary'));
             }
         }

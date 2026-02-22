@@ -16,6 +16,7 @@ export function ThreeScene2D() {
     const [tempBoxX, setTempBoxX] = useState("1.5");
     const [tempBoxY, setTempBoxY] = useState("1.5");
     const [tempBoxZ, setTempBoxZ] = useState("0"); // Not used
+    const [tempBoundarySpacing, setTempBoundarySpacing] = useState("0.05");
     const [tempControls, setTempControls] = useState(true);
     const pausedRef = useRef(isPaused);
     const [fps, setFps] = useState(0);
@@ -36,7 +37,8 @@ export function ThreeScene2D() {
 
         handleApplyTemp()
 
-        let sph = new SPH2D(numParticles, new THREE.Vector2(handleApplyTempBoxX(), handleApplyTempBoxY()));
+        let box = new THREE.Vector2(handleApplyTempBoxX(), handleApplyTempBoxY());
+        let sph = new SPH2D(numParticles, box, handleApplyTempBoundarySpacing());
         let particles = sph.createParticles();
 
         function generateCircleTexture() {
@@ -244,6 +246,15 @@ export function ThreeScene2D() {
         }
     };
 
+    const handleApplyTempBoundarySpacing = () => {
+      const newSpacing = parseFloat(tempBoundarySpacing);
+      if (!isNaN(newSpacing) && newSpacing > 0) {
+          return newSpacing
+      } else {
+          return 0.02
+      }
+    };
+
     return (
         <Box ref={mountRef} sx={{ width: '100%', height: '100%', position: 'relative' }}>
             <UIControls
@@ -263,6 +274,8 @@ export function ThreeScene2D() {
                 setTempBoxY={setTempBoxY}
                 tempBoxZ={tempBoxZ}
                 setTempBoxZ={setTempBoxZ}
+                tempBoundarySpacing={tempBoundarySpacing}
+                setTempBoundarySpacing={setTempBoundarySpacing}
             />
         </Box>
     );

@@ -37,7 +37,7 @@ export class Particle {
 type Grid = Map<string, number[]>;
 export class SPH3D {
 
-    constructor(n: number, box: THREE.Vector3, bSpacing?: number, ) {
+    constructor(n: number, box: THREE.Vector3, bSpacing?: number) {
         N = n;
         BOX_SIZE = box
         spacing = Math.pow(BOX_SIZE.x * BOX_SIZE.y * BOX_SIZE.z * 0.5 / N, 1 / 3);
