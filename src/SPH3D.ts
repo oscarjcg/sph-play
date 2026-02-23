@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { GenerationUtil3D } from './GenerationUtil3D';
 
 let N = 100;
 const RHO0 = 1000.0; // Rest density
@@ -36,7 +37,7 @@ export class Particle {
 type Grid = Map<string, number[]>;
 export class SPH3D {
 
-    constructor(n: number, h: number, dt: number, grav: number, box: THREE.Vector3, bSpacing?: number) {
+    constructor(n: number, h: number, dt: number, grav: number, box: THREE.Vector3, fluidCenter: THREE.Vector3, bSpacing?: number) {
         N = n;
         H = h; // Smoothing radius
         CELL_SIZE = H;
@@ -46,28 +47,15 @@ export class SPH3D {
         spacing = Math.pow(BOX_SIZE.x * BOX_SIZE.y * BOX_SIZE.z * 0.5 / N, 1 / 3);
         boundarySpacing = bSpacing ?? spacing
         M = RHO0 * spacing ** 3; // Mass
+        this.fluidCenter = fluidCenter
     }
 
-    createParticles() {
-        let particles: Particle[] = [];
+    private fluidCenter : THREE.Vector3 = new THREE.Vector3(BOX_SIZE.x / 2, BOX_SIZE.y / 2, BOX_SIZE.z / 2)
 
-        let nxFluid = Math.floor(BOX_SIZE.x / 2 / spacing);
-        let ny = Math.floor(BOX_SIZE.y / spacing);
-        let nz = Math.floor(BOX_SIZE.z / spacing);
-        for (let i = 0; i < nxFluid; i++) {
-            for (let j = 0; j < ny; j++) {
-                for (let k = 0; k < nz; k++) {
-                    let x = i * spacing + spacing / 2;
-                    let y = j * spacing + spacing / 2;
-                    let z = k * spacing + spacing / 2;
-                    if (particles.length < N) {
-                        // Make uneven grid
-                        let jitter = ((j + k) % 2 === 0) ? 0 : 0.01;
-                        particles.push(new Particle([x + jitter, y, z], 'fluid'));
-                    }
-                }
-            }
-        }
+    createParticles() {
+        //let particles: Particle[] = GenerationUtil3D.generateCube(N, this.fluidCenter)
+        let particles: Particle[] = GenerationUtil3D.generateSphere(N, this.fluidCenter)
+        
 
         // Boundary particles
         let numLayers = 1;

@@ -9,7 +9,7 @@ export function ThreeScene3D() {
   const mountRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
   const [resetTrigger, setResetTrigger] = useState(0);
-  const [numParticles, setNumParticles] = useState(5000);
+  const [numParticles, setNumParticles] = useState(1000);
   const [tempN, setTempN] = useState(numParticles.toString());
   const [tempH, setTempH] = useState("0.03");
   const [tempDT, setTempDT] = useState("0.0003");
@@ -18,6 +18,9 @@ export function ThreeScene3D() {
   const [tempBoxX, setTempBoxX] = useState("0.5");
   const [tempBoxY, setTempBoxY] = useState("0.5");
   const [tempBoxZ, setTempBoxZ] = useState("0.5");
+  const [tempFluidX, setTempFluidX] = useState("0.25");
+  const [tempFluidY, setTempFluidY] = useState("0.25");
+  const [tempFluidZ, setTempFluidZ] = useState(("0.25"));
   const [tempBoundarySpacing, setTempBoundarySpacing] = useState("0.02");
   const [tempControls, setTempControls] = useState(true);
   const [tempVColor, setTempVColor] = useState(true);
@@ -46,7 +49,9 @@ export function ThreeScene3D() {
     let dt = handleApplyTempDT();
     let grav = handleApplyTempGRAV()
     let box = new THREE.Vector3(handleApplyTempBoxX(), handleApplyTempBoxY(), handleApplyTempBoxZ())
-    let sph = new SPH3D(numParticles, h, dt, grav, box, handleApplyTempBoundarySpacing())
+    let fluidCenter = new THREE.Vector3(handleApplyTempFluidX(), handleApplyTempFluidY(), handleApplyTempFluidZ())
+
+    let sph = new SPH3D(numParticles, h, dt, grav, box, fluidCenter, handleApplyTempBoundarySpacing())
 
     let particles = sph.createParticles();
 
@@ -304,6 +309,33 @@ export function ThreeScene3D() {
       }
   };
 
+  const handleApplyTempFluidX = () => {
+        const newX = parseFloat(tempFluidX);
+        if (!isNaN(newX) && newX > 0) {
+            return newX
+        } else {
+            return 0.5
+        }
+    };
+
+    const handleApplyTempFluidY = () => {
+        const newY = parseFloat(tempFluidY);
+        if (!isNaN(newY) && newY > 0) {
+            return newY
+        } else {
+            return 0.5
+        }
+    };
+
+    const handleApplyTempFluidZ = () => {
+        const newZ = parseFloat(tempFluidZ);
+        if (!isNaN(newZ) && newZ > 0) {
+            return newZ
+        } else {
+            return 0.5
+        }
+    };
+
   return (
           <Box ref={mountRef} sx={{ width: '100%', height: '100%', position: 'relative' }}>
               <UIControls
@@ -331,6 +363,12 @@ export function ThreeScene3D() {
                   setTempBoxY={setTempBoxY}
                   tempBoxZ={tempBoxZ}
                   setTempBoxZ={setTempBoxZ}
+                  tempFluidX={tempFluidX}
+                  setTempFluidX={setTempFluidX}
+                  tempFluidY={tempFluidY}
+                  setTempFluidY={setTempFluidY}
+                  tempFluidZ={tempFluidZ}
+                  setTempFluidZ={setTempFluidZ}
                   tempBoundarySpacing={tempBoundarySpacing}
                   setTempBoundarySpacing={setTempBoundarySpacing}
               />

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-
+import { GenerationUtil2D } from './GenerationUtil2D'
 
 let N = 50;
 const RHO0 = 1000.0; // Rest density
@@ -17,8 +17,8 @@ let spacing = Math.sqrt(BOX_SIZE.x * BOX_SIZE.y * 0.5 / N);
 let boundarySpacing = Math.sqrt(BOX_SIZE.x * BOX_SIZE.y * 0.5 / N);
 let M = RHO0 * spacing ** 2; // Mass
 
-// Spatial grid for efficient neighbor search
 type Grid = Map<string, number[]>;
+export type Line = [THREE.Vector2, THREE.Vector2];
 
 export class Particle {
     r: THREE.Vector2;
@@ -38,7 +38,7 @@ export class Particle {
 
 export class SPH2D {
 
-    constructor(n: number, h: number, dt: number, grav: number, box: THREE.Vector2, bSpacing?: number) {
+    constructor(n: number, h: number, dt: number, grav: number, box: THREE.Vector2, lines: Line[], fluidCenter: THREE.Vector2, bSpacing?: number) {
         N = n;
         H = h; // Smoothing radius
         CELL_SIZE = H;
@@ -48,67 +48,21 @@ export class SPH2D {
         spacing = Math.sqrt(BOX_SIZE.x * BOX_SIZE.y * 0.5 / N);
         boundarySpacing = bSpacing ?? spacing
         M = RHO0 * spacing ** 2;
+        this.customLines = lines;
+        this.fluidCenter = fluidCenter
     }
 
+    private customLines: Line[] = [];
+    private fluidCenter  : THREE.Vector2 = new THREE.Vector2(BOX_SIZE.x / 2, BOX_SIZE.y / 2)
+
     createParticles() {
-        let particles: Particle[] = [];
-
-        let nxFluid = Math.floor(BOX_SIZE.x / 2 / spacing);
-        let ny = Math.floor(BOX_SIZE.y / spacing);
-        for (let i = 0; i < nxFluid; i++) {
-            for (let j = 0; j < ny; j++) {
-                let x = i * spacing + spacing / 2;
-                let y = j * spacing + spacing / 2;
-                if (particles.length < N) {
-                    // Make uneven grid
-                    if (j % 2 == 0) {
-                        particles.push(new Particle([x, y], 'fluid'));
-                    } else {
-                        particles.push(new Particle([x + 0.01, y], 'fluid'));
-                    }
-
-                }
-            }
-        }
+        //let particles: Particle[] = Generationutil.generateSquare(N, this.fluidCenter)
+        let particles: Particle[] = GenerationUtil2D.generateCircle(N, this.fluidCenter)
 
         // Boundary particles
-        let numLayers = 1;
-        // Bottom
-        for (let k = 0; k < numLayers; k++) {
-            let y = - (k + 1) * boundarySpacing;
-            let nx = Math.floor(BOX_SIZE.x / boundarySpacing) + 1;
-            for (let i = 0; i < nx; i++) {
-                let x = i * boundarySpacing;
-                particles.push(new Particle([x, y], 'boundary'));
-            }
-        }
-        // Top
-        for (let k = 0; k < numLayers; k++) {
-            let y = BOX_SIZE.y + (k + 1) * boundarySpacing;
-            let nx = Math.floor(BOX_SIZE.x / boundarySpacing) + 1;
-            for (let i = 0; i < nx; i++) {
-                let x = i * boundarySpacing;
-                particles.push(new Particle([x, y], 'boundary'));
-            }
-        }
+        let lineParticules = GenerationUtil2D.generateLine(this.customLines, boundarySpacing)
+        particles.push(...lineParticules)
 
-        let nyCol = Math.floor(BOX_SIZE.y / boundarySpacing) + 1 + numLayers;
-        // Left
-        for (let k = 0; k < numLayers; k++) {
-            let x = - (k + 1) * boundarySpacing;
-            for (let j = -numLayers; j < nyCol; j++) {
-                let y = j * boundarySpacing;
-                particles.push(new Particle([x, y], 'boundary'));
-            }
-        }
-        // Right
-        for (let k = 0; k < numLayers; k++) {
-            let x = BOX_SIZE.x + (k + 1) * boundarySpacing;
-            for (let j = -numLayers; j < nyCol; j++) {
-                let y = j * boundarySpacing;
-                particles.push(new Particle([x, y], 'boundary'));
-            }
-        }
         return particles;
     }
 
