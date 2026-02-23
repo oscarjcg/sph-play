@@ -47,14 +47,14 @@ export class SPH2D {
     }
 
     createParticles() {
-        const particles: Particle[] = [];
+        let particles: Particle[] = [];
 
-        const nx_fluid = Math.floor(BOX_SIZE.x / 2 / spacing);
-        const ny = Math.floor(BOX_SIZE.y / spacing);
-        for (let i = 0; i < nx_fluid; i++) {
+        let nxFluid = Math.floor(BOX_SIZE.x / 2 / spacing);
+        let ny = Math.floor(BOX_SIZE.y / spacing);
+        for (let i = 0; i < nxFluid; i++) {
             for (let j = 0; j < ny; j++) {
-                const x = i * spacing + spacing / 2;
-                const y = j * spacing + spacing / 2;
+                let x = i * spacing + spacing / 2;
+                let y = j * spacing + spacing / 2;
                 if (particles.length < N) {
                     // Make uneven grid
                     if (j % 2 == 0) {
@@ -68,40 +68,40 @@ export class SPH2D {
         }
 
         // Boundary particles
-        const num_layers = 1;
+        let numLayers = 1;
         // Bottom
-        for (let k = 0; k < num_layers; k++) {
-            const y = - (k + 1) * boundarySpacing;
-            const nx = Math.floor(BOX_SIZE.x / boundarySpacing) + 1;
+        for (let k = 0; k < numLayers; k++) {
+            let y = - (k + 1) * boundarySpacing;
+            let nx = Math.floor(BOX_SIZE.x / boundarySpacing) + 1;
             for (let i = 0; i < nx; i++) {
-                const x = i * boundarySpacing;
+                let x = i * boundarySpacing;
                 particles.push(new Particle([x, y], 'boundary'));
             }
         }
         // Top
-        for (let k = 0; k < num_layers; k++) {
-            const y = BOX_SIZE.y + (k + 1) * boundarySpacing;
-            const nx = Math.floor(BOX_SIZE.x / boundarySpacing) + 1;
+        for (let k = 0; k < numLayers; k++) {
+            let y = BOX_SIZE.y + (k + 1) * boundarySpacing;
+            let nx = Math.floor(BOX_SIZE.x / boundarySpacing) + 1;
             for (let i = 0; i < nx; i++) {
-                const x = i * boundarySpacing;
+                let x = i * boundarySpacing;
                 particles.push(new Particle([x, y], 'boundary'));
             }
         }
 
-        const ny_b = Math.floor(BOX_SIZE.y / boundarySpacing) + 1 + num_layers;
+        let nyCol = Math.floor(BOX_SIZE.y / boundarySpacing) + 1 + numLayers;
         // Left
-        for (let k = 0; k < num_layers; k++) {
-            const x = - (k + 1) * boundarySpacing;
-            for (let j = -num_layers; j < ny_b; j++) {
-                const y = j * boundarySpacing;
+        for (let k = 0; k < numLayers; k++) {
+            let x = - (k + 1) * boundarySpacing;
+            for (let j = -numLayers; j < nyCol; j++) {
+                let y = j * boundarySpacing;
                 particles.push(new Particle([x, y], 'boundary'));
             }
         }
         // Right
-        for (let k = 0; k < num_layers; k++) {
-            const x = BOX_SIZE.x + (k + 1) * boundarySpacing;
-            for (let j = -num_layers; j < ny_b; j++) {
-                const y = j * boundarySpacing;
+        for (let k = 0; k < numLayers; k++) {
+            let x = BOX_SIZE.x + (k + 1) * boundarySpacing;
+            for (let j = -numLayers; j < nyCol; j++) {
+                let y = j * boundarySpacing;
                 particles.push(new Particle([x, y], 'boundary'));
             }
         }
@@ -109,10 +109,10 @@ export class SPH2D {
     }
 
     kernel(r: THREE.Vector2, h: number): number {
-        const rn = r.length();
-        const q = rn / h;
+        let rn = r.length();
+        let q = rn / h;
         if (q > 1.0) return 0.0;
-        const sigma = 40.0 / (7.0 * Math.PI * h ** 2);
+        let sigma = 40.0 / (7.0 * Math.PI * h ** 2);
         if (q <= 0.5) {
             return sigma * (6.0 * (q ** 3 - q ** 2) + 1.0);
         } else {
@@ -120,10 +120,10 @@ export class SPH2D {
         }
     }
 
-    grad_kernel(r: THREE.Vector2, h: number): THREE.Vector2 {
-        const rn = r.length();
+    gradKernel(r: THREE.Vector2, h: number): THREE.Vector2 {
+        let rn = r.length();
         if (rn === 0.0) return new THREE.Vector2(0, 0);
-        const q = rn / h;
+        let q = rn / h;
         if (q > 1.0) return new THREE.Vector2(0, 0);
         const sigma = 40.0 / (7.0 * Math.PI * h ** 2);
         let dfdq: number;
@@ -132,32 +132,32 @@ export class SPH2D {
         } else {
             dfdq = -6.0 * (1.0 - q) ** 2;
         }
-        const dir = r.clone().normalize();
+        let dir = r.clone().normalize();
         return dir.multiplyScalar(sigma * dfdq / h);
     }
 
-    build_grid(particles: Particle[], cell_size: number): Grid {
-        const grid: Grid = new Map();
+    buildGrid(particles: Particle[], cell_size: number): Grid {
+        let grid: Grid = new Map();
         particles.forEach((p, i) => {
-            const cx = Math.floor(p.r.x / cell_size);
-            const cy = Math.floor(p.r.y / cell_size);
-            const key = `${cx},${cy}`;
+            let cx = Math.floor(p.r.x / cell_size);
+            let cy = Math.floor(p.r.y / cell_size);
+            let key = `${cx},${cy}`;
             if (!grid.has(key)) grid.set(key, []);
             grid.get(key)!.push(i);
         });
         return grid;
     }
 
-    get_neighbors(i: number, particles: Particle[], h: number, grid: Grid, cell_size: number): number[] {
-        const neighbors: number[] = [];
-        const p = particles[i];
-        const cx = Math.floor(p.r.x / cell_size);
-        const cy = Math.floor(p.r.y / cell_size);
+    getNeighbors(i: number, particles: Particle[], h: number, grid: Grid, cell_size: number): number[] {
+        let neighbors: number[] = [];
+        let p = particles[i];
+        let cx = Math.floor(p.r.x / cell_size);
+        let cy = Math.floor(p.r.y / cell_size);
         for (let dx = -1; dx <= 1; dx++) {
             for (let dy = -1; dy <= 1; dy++) {
-                const key = `${cx + dx},${cy + dy}`;
+                let key = `${cx + dx},${cy + dy}`;
                 if (grid.has(key)) {
-                    for (const j of grid.get(key)!) {
+                    for (let j of grid.get(key)!) {
                         if (i !== j && p.r.clone().sub(particles[j].r).length() < h) {
                             neighbors.push(j);
                         }
@@ -168,19 +168,19 @@ export class SPH2D {
         return neighbors;
     }
 
-    compute_densities(particles: Particle[], h: number, m: number, grid: Grid, cell_size: number): void {
+    computeDensities(particles: Particle[], h: number, m: number, grid: Grid, cell_size: number): void {
         for (let i = 0; i < particles.length; i++) {
-            let rho = m * this.kernel(new THREE.Vector2(0, 0), h); // Self-contribution
-            const neighbors = this.get_neighbors(i, particles, h, grid, cell_size);
-            for (const j of neighbors) {
+            let rho = m * this.kernel(new THREE.Vector2(0, 0), h);
+            let neighbors = this.getNeighbors(i, particles, h, grid, cell_size);
+            for (let j of neighbors) {
                 rho += m * this.kernel(particles[i].r.clone().sub(particles[j].r), h);
             }
             particles[i].rho = rho;
         }
     }
 
-    compute_pressures(particles: Particle[], rho0: number, k: number): void {
-        for (const p of particles) {
+    computePressures(particles: Particle[], rho0: number, k: number): void {
+        for (let p of particles) {
             p.p = k * (p.rho / rho0 - 1.0);
             if (p.p < 0) p.p = 0.0;
         }
@@ -191,65 +191,64 @@ export class SPH2D {
     }
 
     step(particles: Particle[], dt: number, h: number, m: number, visc: number, rho0: number, k: number, grav: THREE.Vector2): void {
-        const grid = this.build_grid(particles, CELL_SIZE);
+        const grid = this.buildGrid(particles, CELL_SIZE);
         // Reconstruct densities
-        this.compute_densities(particles, h, m, grid, CELL_SIZE);
+        this.computeDensities(particles, h, m, grid, CELL_SIZE);
         // Viscosity force
-        const Fvisc: THREE.Vector2[] = particles.map(() => new THREE.Vector2(0, 0));
+        const fVisc: THREE.Vector2[] = particles.map(() => new THREE.Vector2(0, 0));
         for (let i = 0; i < particles.length; i++) {
             if (particles[i].type !== 'fluid') continue;
-            let lap_v = new THREE.Vector2(0, 0);
-            const neighbors = this.get_neighbors(i, particles, h, grid, CELL_SIZE);
-            for (const j of neighbors) {
-                const r_ij = particles[i].r.clone().sub(particles[j].r);
-                const rn = r_ij.length();
+            let lapV = new THREE.Vector2(0, 0);
+            let neighbors = this.getNeighbors(i, particles, h, grid, CELL_SIZE);
+            for (let j of neighbors) {
+                let r_ij = particles[i].r.clone().sub(particles[j].r);
+                let rn = r_ij.length();
                 if (rn === 0) continue;
-                const gradW = this.grad_kernel(r_ij, h);
-                const gw_norm = gradW.length();
-                const term = particles[j].v.clone().sub(particles[i].v).multiplyScalar((m / particles[j].rho) * 2.0 * gw_norm / rn);
-                lap_v.add(term);
+                let gradW = this.gradKernel(r_ij, h);
+                let gwNorm = gradW.length();
+                let term = particles[j].v.clone().sub(particles[i].v).multiplyScalar((m / particles[j].rho) * 2.0 * gwNorm / rn);
+                lapV.add(term);
             }
-            Fvisc[i] = lap_v.multiplyScalar(visc * m);
+            fVisc[i] = lapV.multiplyScalar(visc * m);
         }
         // Intermediate velocities
-        const v_star: THREE.Vector2[] = [];
+        const vStar: THREE.Vector2[] = [];
         for (let i = 0; i < particles.length; i++) {
             if (particles[i].type !== 'fluid') {
-                v_star[i] = new THREE.Vector2(0, 0);
+                vStar[i] = new THREE.Vector2(0, 0);
                 continue;
             }
-            const Fext_i = grav.clone().multiplyScalar(m);
-            const accel = Fvisc[i].clone().add(Fext_i).multiplyScalar(dt / m);
-            v_star[i] = particles[i].v.clone().add(accel);
+            const fExt_i = grav.clone().multiplyScalar(m);
+            const accel = fVisc[i].clone().add(fExt_i).multiplyScalar(dt / m);
+            vStar[i] = particles[i].v.clone().add(accel);
         }
         // Pressures
-        this.compute_pressures(particles, rho0, k);
+        this.computePressures(particles, rho0, k);
         // Pressure forces
         // TODO Creating several arrays on each step, triggering garbage collection, reuse arrays
-        const Fpress: THREE.Vector2[] = particles.map(() => new THREE.Vector2(0, 0));
+        const fPress: THREE.Vector2[] = particles.map(() => new THREE.Vector2(0, 0));
         for (let i = 0; i < particles.length; i++) {
             if (particles[i].type !== 'fluid') continue;
-            let gradp = new THREE.Vector2(0, 0);
-            const neighbors = this.get_neighbors(i, particles, h, grid, CELL_SIZE);
-            for (const j of neighbors) {
-                const r_ij = particles[i].r.clone().sub(particles[j].r);
-                const gradW = this.grad_kernel(r_ij, h);
-                const term = (particles[i].p / (particles[i].rho ** 2) + particles[j].p / (particles[j].rho ** 2)) * m;
-                gradp.add(gradW.multiplyScalar(term));
+            let gradP = new THREE.Vector2(0, 0);
+            const neighbors = this.getNeighbors(i, particles, h, grid, CELL_SIZE);
+            for (let j of neighbors) {
+                let r_ij = particles[i].r.clone().sub(particles[j].r);
+                let gradW = this.gradKernel(r_ij, h);
+                let term = (particles[i].p / (particles[i].rho ** 2) + particles[j].p / (particles[j].rho ** 2)) * m;
+                gradP.add(gradW.multiplyScalar(term));
             }
-            const a_press = gradp.negate();
-            Fpress[i] = a_press.multiplyScalar(m);
+            const aPress = gradP.negate();
+            fPress[i] = aPress.multiplyScalar(m);
         }
         // Update velocities and positions
         for (let i = 0; i < particles.length; i++) {
             if (particles[i].type !== 'fluid') {
-                console.log("set v 0 0 " + particles[i].type)
                 particles[i].v.set(0, 0);
                 continue;
             }
-            const dv = Fpress[i].clone().multiplyScalar(dt / m);
-            particles[i].v = v_star[i].clone().add(dv);
-            const dr = particles[i].v.clone().multiplyScalar(dt);
+            let dv = fPress[i].clone().multiplyScalar(dt / m);
+            particles[i].v = vStar[i].clone().add(dv);
+            let dr = particles[i].v.clone().multiplyScalar(dt);
             particles[i].r.add(dr);
         }
     }
