@@ -3,14 +3,14 @@ import * as THREE from 'three';
 let N = 100;
 const RHO0 = 1000.0; // Rest density
 export let BOX_SIZE = new THREE.Vector3(0.5, 0.5, 0.5);
-const GRAV = new THREE.Vector3(0.0, -9.81, 0.0);
-const DT = 0.0003; // TODO Dynamic
+let GRAV = new THREE.Vector3(0.0, -9.81, 0.0);
+let DT = 0.0003; // TODO Dynamic
 const C = 20.0; // Speed of sound
 const K = C ** 2 * RHO0; // Stiffness constant for state equation 
 const VISC = 0.5; // Viscosity
 
-const H = 0.03; // Smoothing radius
-const CELL_SIZE = H; // Spatial grid
+let H = 0.03; // Smoothing radius
+let CELL_SIZE = H; // Spatial grid
 
 let spacing = Math.pow(BOX_SIZE.x * BOX_SIZE.y * BOX_SIZE.z * 0.5 / N, 1 / 3);
 let boundarySpacing = Math.pow(BOX_SIZE.x * BOX_SIZE.y * BOX_SIZE.z * 0.5 / N, 1 / 3);
@@ -36,9 +36,13 @@ export class Particle {
 type Grid = Map<string, number[]>;
 export class SPH3D {
 
-    constructor(n: number, box: THREE.Vector3, bSpacing?: number) {
+    constructor(n: number, h: number, dt: number, grav: number, box: THREE.Vector3, bSpacing?: number) {
         N = n;
-        BOX_SIZE = box
+        H = h; // Smoothing radius
+        CELL_SIZE = H;
+        DT = dt;
+        GRAV = new THREE.Vector3(0.0, grav, 0.0);
+        BOX_SIZE = box;
         spacing = Math.pow(BOX_SIZE.x * BOX_SIZE.y * BOX_SIZE.z * 0.5 / N, 1 / 3);
         boundarySpacing = bSpacing ?? spacing
         M = RHO0 * spacing ** 3; // Mass

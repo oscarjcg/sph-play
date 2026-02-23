@@ -12,12 +12,16 @@ export function ThreeScene2D() {
     const [resetTrigger, setResetTrigger] = useState(0);
     const [numParticles, setNumParticles] = useState(50); 
     const [tempN, setTempN] = useState(numParticles.toString());
+    const [tempH, setTempH] = useState("0.03");
+    const [tempDT, setTempDT] = useState("0.0003");
+    const [tempGRAV, setTempGRAV] = useState("-9.81");
     const [tempScale, setTempScale] = useState("1");
     const [tempBoxX, setTempBoxX] = useState("1.5");
     const [tempBoxY, setTempBoxY] = useState("1.5");
     const [tempBoxZ, setTempBoxZ] = useState("0"); // Not used
     const [tempBoundarySpacing, setTempBoundarySpacing] = useState("0.05");
     const [tempControls, setTempControls] = useState(true);
+    const [tempVColor, setTempVColor] = useState(true);
     const pausedRef = useRef(isPaused);
     const [fps, setFps] = useState(0);
 
@@ -34,10 +38,15 @@ export function ThreeScene2D() {
 
         // Color normalization
         const MAX_SPEED = 1.0;
-        handleApplyTemp()
+        handleApplyTemp();
 
+        let h = handleApplyTempH();
+        let dt = handleApplyTempDT()
+        let grav = handleApplyTempGRAV()
         let box = new THREE.Vector2(handleApplyTempBoxX(), handleApplyTempBoxY());
-        let sph = new SPH2D(numParticles, box, handleApplyTempBoundarySpacing());
+        let boundarySpacing = handleApplyTempBoundarySpacing();
+
+        let sph = new SPH2D(numParticles, h, dt, grav, box, boundarySpacing);
         let particles = sph.createParticles();
 
         function generateCircleTexture() {
@@ -165,21 +174,23 @@ export function ThreeScene2D() {
                 pos[i * 3 + 1] = fluidParticles[i].r.y * SCALE_PIXELS;
 
                 // Update velocity color
-                const speed = fluidParticles[i].v.length();
-                const normalized = Math.min(speed / MAX_SPEED, 1);
-                let r = 0, g = 0, b = 0;
-                if (normalized < 0.5) {
-                    r = 0;
-                    g = normalized * 2;
-                    b = 1 - normalized * 2;
-                } else {
-                    r = (normalized - 0.5) * 2;
-                    g = 1 - (normalized - 0.5) * 2;
-                    b = 0;
+                if (tempVColor) {
+                    const speed = fluidParticles[i].v.length();
+                    const normalized = Math.min(speed / MAX_SPEED, 1);
+                    let r = 0, g = 0, b = 0;
+                    if (normalized < 0.5) {
+                        r = 0;
+                        g = normalized * 2;
+                        b = 1 - normalized * 2;
+                    } else {
+                        r = (normalized - 0.5) * 2;
+                        g = 1 - (normalized - 0.5) * 2;
+                        b = 0;
+                    }
+                    colors[i * 3] = r;
+                    colors[i * 3 + 1] = g;
+                    colors[i * 3 + 2] = b;
                 }
-                colors[i * 3] = r;
-                colors[i * 3 + 1] = g;
-                colors[i * 3 + 2] = b;
             }
 
             geometry.attributes.position.needsUpdate = true;
@@ -226,6 +237,33 @@ export function ThreeScene2D() {
         }
     };
 
+    const handleApplyTempH = () => {
+        const newH = parseFloat(tempH);
+        if (!isNaN(newH) && newH > 0) {
+            return newH
+        } else {
+            return 0.03
+        }
+    };
+
+    const handleApplyTempDT = () => {
+        const newDT = parseFloat(tempDT);
+        if (!isNaN(newDT) && newDT > 0) {
+            return newDT
+        } else {
+            return 0.03
+        }
+    };
+    
+    const handleApplyTempGRAV = () => {
+        const newGRAV = parseFloat(tempGRAV);
+        if (!isNaN(newGRAV) && newGRAV > 0) {
+            return newGRAV
+        } else {
+            return -9.81
+        }
+    };
+
     const handleApplyTempBoxX = () => {
         const newX = parseFloat(tempBoxX);
         if (!isNaN(newX) && newX > 0) {
@@ -259,11 +297,19 @@ export function ThreeScene2D() {
                 fps={fps}
                 tempControls={tempControls}
                 setTempControls={setTempControls}
+                tempVColor={tempVColor}
+                setTempVColor={setTempVColor}
                 isPaused={isPaused}
                 setIsPaused={setIsPaused}
                 onReset={() => setResetTrigger(prev => prev + 1)}
                 tempN={tempN}
                 setTempN={setTempN}
+                tempH={tempH}
+                setTempH={setTempH}
+                tempDT={tempDT}
+                setTempDT={setTempDT}
+                tempGRAV={tempGRAV}
+                setTempGRAV={setTempGRAV}
                 tempScale={tempScale}
                 setTempScale={setTempScale}
                 tempBoxX={tempBoxX}
@@ -274,6 +320,7 @@ export function ThreeScene2D() {
                 setTempBoxZ={setTempBoxZ}
                 tempBoundarySpacing={tempBoundarySpacing}
                 setTempBoundarySpacing={setTempBoundarySpacing}
+                
             />
         </Box>
     );

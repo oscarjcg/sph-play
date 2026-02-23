@@ -4,14 +4,14 @@ import * as THREE from 'three';
 let N = 50;
 const RHO0 = 1000.0; // Rest density
 export let BOX_SIZE = new THREE.Vector2(2.5, 2.5);
-const GRAV = new THREE.Vector2(0.0, -9.81);
-const DT = 0.0003; // TODO Dynamic
+let GRAV = new THREE.Vector2(0.0, -9.81);
+let DT = 0.0003; // TODO Dynamic
 const C = 20.0; // Speed of sound
 const K = C ** 2 * RHO0; // Stiffness constant for state equation
 const VISC = 0.5; // Viscosity
 
-const H = 0.03; // Smoothing radius
-const CELL_SIZE = H; // Spatial grid
+let H = 0.03; // Smoothing radius
+let CELL_SIZE = H; // Spatial grid
 
 let spacing = Math.sqrt(BOX_SIZE.x * BOX_SIZE.y * 0.5 / N);
 let boundarySpacing = Math.sqrt(BOX_SIZE.x * BOX_SIZE.y * 0.5 / N);
@@ -38,9 +38,13 @@ export class Particle {
 
 export class SPH2D {
 
-    constructor(n: number, box: THREE.Vector2, bSpacing?: number) {
+    constructor(n: number, h: number, dt: number, grav: number, box: THREE.Vector2, bSpacing?: number) {
         N = n;
-        BOX_SIZE = box
+        H = h; // Smoothing radius
+        CELL_SIZE = H;
+        DT = dt;
+        GRAV = new THREE.Vector2(0.0, grav);
+        BOX_SIZE = box;
         spacing = Math.sqrt(BOX_SIZE.x * BOX_SIZE.y * 0.5 / N);
         boundarySpacing = bSpacing ?? spacing
         M = RHO0 * spacing ** 2;

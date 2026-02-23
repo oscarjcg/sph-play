@@ -4,11 +4,19 @@ export function UIControls({
     fps,
     tempControls,
     setTempControls,
+    tempVColor,
+    setTempVColor,
     isPaused,
     setIsPaused,
     onReset,
     tempN,
     setTempN,
+    tempH,
+    setTempH,
+    tempDT,
+    setTempDT,
+    tempGRAV,
+    setTempGRAV,
     tempScale,
     setTempScale,
     tempBoxX,
@@ -23,11 +31,19 @@ export function UIControls({
     fps: number;
     tempControls: boolean;
     setTempControls: (v: boolean) => void;
+    tempVColor: boolean;
+    setTempVColor: (v: boolean) => void;
     isPaused: boolean;
     setIsPaused: (v: boolean) => void;
     onReset: () => void;
     tempN: string;
     setTempN: (v: string) => void;
+    tempH: string;
+    setTempH: (v: string) => void;
+    tempDT: string;
+    setTempDT: (v: string) => void;
+    tempGRAV: string;
+    setTempGRAV: (v: string) => void;
     tempScale: string;
     setTempScale: (v: string) => void;
     tempBoxX: string;
@@ -82,6 +98,19 @@ export function UIControls({
                         </Button>
                     </Stack>
 
+                    <Stack direction="row" spacing={2} alignItems="center">
+                        <Typography
+                            sx={{ color: 'text.primary' }}
+                        >
+                            V Color:
+                        </Typography>
+                        <Checkbox
+                            checked={tempVColor}
+                            onChange={(e) => setTempVColor(e.target.checked)}
+                            color="primary"
+                        />
+                    </Stack>
+
                     {/* N Particules */}
                     <Stack direction="row" spacing={2} alignItems="center">
                         <Typography
@@ -93,6 +122,54 @@ export function UIControls({
                             type="number"
                             value={tempN}
                             onChange={(e) => setTempN(e.target.value)}
+                            variant="outlined"
+                            size="small"
+                            sx={{ color: 'text.primary' }}
+                        />
+                    </Stack>
+
+                    <Stack direction="row" spacing={2} alignItems="center">
+                        <Typography
+                            sx={{ color: 'text.primary' }}
+                        >
+                            H:
+                        </Typography>
+                        <TextField
+                            type="number"
+                            value={tempH}
+                            onChange={(e) => setTempH(e.target.value)}
+                            variant="outlined"
+                            size="small"
+                            sx={{ color: 'text.primary' }}
+                        />
+                    </Stack>
+
+                    <Stack direction="row" spacing={2} alignItems="center">
+                        <Typography
+                            sx={{ color: 'text.primary' }}
+                        >
+                            DT:
+                        </Typography>
+                        <TextField
+                            type="number"
+                            value={tempDT}
+                            onChange={(e) => setTempDT(e.target.value)}
+                            variant="outlined"
+                            size="small"
+                            sx={{ color: 'text.primary' }}
+                        />
+                    </Stack>
+
+                    <Stack direction="row" spacing={2} alignItems="center">
+                        <Typography
+                            sx={{ color: 'text.primary' }}
+                        >
+                            G:
+                        </Typography>
+                        <TextField
+                            type="number"
+                            value={tempGRAV}
+                            onChange={(e) => setTempGRAV(e.target.value)}
                             variant="outlined"
                             size="small"
                             sx={{ color: 'text.primary' }}
