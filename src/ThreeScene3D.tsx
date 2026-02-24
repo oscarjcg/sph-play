@@ -9,12 +9,12 @@ export function ThreeScene3D() {
   const mountRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
   const [resetTrigger, setResetTrigger] = useState(0);
-  const [numParticles, setNumParticles] = useState(1000);
-  const [tempN, setTempN] = useState(numParticles.toString());
+  const [tempN, setTempN] = useState("1000");
   const [tempH, setTempH] = useState("0.03");
   const [tempDT, setTempDT] = useState("0.0003");
   const [tempGRAV, setTempGRAV] = useState("-9.81");
   const [tempScale, setTempScale] = useState("0.5");
+  const [tempScene, setTempScene] = useState("0");
   const [tempBoxX, setTempBoxX] = useState("0.5");
   const [tempBoxY, setTempBoxY] = useState("0.5");
   const [tempBoxZ, setTempBoxZ] = useState("0.5");
@@ -43,15 +43,14 @@ export function ThreeScene3D() {
     // Color normalization
     const MAX_SPEED = 1.0;
 
-    handleApplyTemp()
-
+    let n = handleApplyTempN();
     let h = handleApplyTempH();
     let dt = handleApplyTempDT();
     let grav = handleApplyTempGRAV()
     let box = new THREE.Vector3(handleApplyTempBoxX(), handleApplyTempBoxY(), handleApplyTempBoxZ())
     let fluidCenter = new THREE.Vector3(handleApplyTempFluidX(), handleApplyTempFluidY(), handleApplyTempFluidZ())
 
-    let sph = new SPH3D(numParticles, h, dt, grav, box, fluidCenter, handleApplyTempBoundarySpacing())
+    let sph = new SPH3D(n, h, dt, grav, box, fluidCenter, handleApplyTempBoundarySpacing())
 
     let particles = sph.createParticles();
 
@@ -239,10 +238,12 @@ export function ThreeScene3D() {
     };
   }, [resetTrigger]);
 
-  const handleApplyTemp = () => {
+  const handleApplyTempN = () => {
       const newN = parseInt(tempN, 10);
       if (!isNaN(newN) && newN > 0) {
-          setNumParticles(newN);
+          return newN
+      } else {
+          return 1000
       }
   };
 
@@ -266,7 +267,7 @@ export function ThreeScene3D() {
 
   const handleApplyTempGRAV = () => {
       const newGRAV = parseFloat(tempGRAV);
-      if (!isNaN(newGRAV) && newGRAV > 0) {
+      if (!isNaN(newGRAV)) {
           return newGRAV
       } else {
           return -9.81
@@ -357,6 +358,8 @@ export function ThreeScene3D() {
                   setTempGRAV={setTempGRAV}
                   tempScale={tempScale}
                   setTempScale={setTempScale}
+                  tempScene={tempScene}
+                  setTempScene={setTempScene}
                   tempBoxX={tempBoxX}
                   setTempBoxX={setTempBoxX}
                   tempBoxY={tempBoxY}

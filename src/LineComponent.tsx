@@ -5,7 +5,7 @@ interface LineDrawingComponentProps {
   onLinesDrawn?: (lines: THREE.Vector2[][]) => void;
 }
 
-export const LineDrawingComponent: React.FC<LineDrawingComponentProps> = ({ onLinesDrawn }) => {
+export const LineDrawingComponent: React.FC<LineDrawingComponentProps> = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [currentStart, setCurrentStart] = useState<THREE.Vector2 | null>(null);
   const [lines, setLines] = useState<THREE.Vector2[][]>([]);

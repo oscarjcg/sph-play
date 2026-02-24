@@ -2,7 +2,7 @@ import { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 import { Box } from '@mui/material';
 
-import { SPH2D, BOX_SIZE, type Line } from './SPH2D'
+import { SPH2D, type Line } from './SPH2D'
 import { UIControls } from './UIControls'
 import { Scene2DUtil } from './Scene2DUtil'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
