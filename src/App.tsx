@@ -8,6 +8,7 @@ import Tab from '@mui/material/Tab';
 
 import { ThreeScene2D } from './ThreeScene2D';
 import { ThreeScene3D } from './ThreeScene3D';
+import { LineDrawingComponent} from './LineComponent'
 
 
 const theme = createTheme()

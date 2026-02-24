@@ -4,21 +4,19 @@ import { Box } from '@mui/material';
 
 import { SPH2D, BOX_SIZE, type Line } from './SPH2D'
 import { UIControls } from './UIControls'
+import { Scene2DUtil } from './Scene2DUtil'
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-
-
-// Rotate container
-//Dynamic vars? gravity
 export function ThreeScene2D() {
     const mountRef = useRef<HTMLDivElement>(null);
     const [isPaused, setIsPaused] = useState(false);
     const [resetTrigger, setResetTrigger] = useState(0);
-    const [numParticles, setNumParticles] = useState(50); 
-    const [tempN, setTempN] = useState(numParticles.toString());
+    const [tempN, setTempN] = useState("50");
     const [tempH, setTempH] = useState("0.03");
     const [tempDT, setTempDT] = useState("0.0003");
     const [tempGRAV, setTempGRAV] = useState("-9.81");
     const [tempScale, setTempScale] = useState("1");
+    const [tempScene, setTempScene] = useState("0");
     const [tempBoxX, setTempBoxX] = useState("1.5");
     const [tempBoxY, setTempBoxY] = useState("1.5");
     const [tempBoxZ, setTempBoxZ] = useState("0"); // Not used
@@ -44,23 +42,60 @@ export function ThreeScene2D() {
 
         // Color normalization
         const MAX_SPEED = 1.0;
-        handleApplyTemp();
 
+        let n = handleApplyTempN();
         let h = handleApplyTempH();
         let dt = handleApplyTempDT()
         let grav = handleApplyTempGRAV()
         let box = new THREE.Vector2(handleApplyTempBoxX(), handleApplyTempBoxY());
         let boundarySpacing = handleApplyTempBoundarySpacing();
         let fluidCenter = new THREE.Vector2(handleApplyTempFluidX(), handleApplyTempFluidY())
+        
+        let lines: Line[] = [
+            [new THREE.Vector2(0, 0), new THREE.Vector2(box.x, 0)],
+            [new THREE.Vector2(box.x, 0), new THREE.Vector2(box.x, box.y)],
+            [new THREE.Vector2(box.x, box.y), new THREE.Vector2(0, box.y)],
+            [new THREE.Vector2(0, box.y), new THREE.Vector2(0, 0)]]
+        let multiplier = 0.0;
+        switch (handleApplyTempScene()) {
+            case 1:
+                multiplier = 0.02;
+                lines = Scene2DUtil.scene1()
+                break;
+            case 2:
+                multiplier = 0.02;
+                lines = Scene2DUtil.scene2()
+                break;
+            case 3:
+                multiplier = 0.02;
+                lines = Scene2DUtil.scene3()
+                break;
+            case 4:
+                multiplier = 0.02;
+                lines = Scene2DUtil.scene4()
+                break;
+            case 5:
+                multiplier = 0.02;
+                lines = Scene2DUtil.scene5()
+                break;
+            case 6:
+                multiplier = 0.02;
+                lines = Scene2DUtil.scene6()
+                break;
+            default: 
+                break;            
+        }
+  
+        let scaledLines: Line[] = lines
+        if (handleApplyTempScene() != 0) {
+            const yDiff = 5;
+            scaledLines = lines.map((line) => [
+                new THREE.Vector2(line[0].x * multiplier, (mount.clientHeight - line[0].y) * multiplier - yDiff),
+                new THREE.Vector2(line[1].x * multiplier, (mount.clientHeight - line[1].y) * multiplier - yDiff),
+            ]);
+        }
 
-        const lines: Line[] = [
-            [new THREE.Vector2(0, 0), new THREE.Vector2(BOX_SIZE.x, 0)],
-            [new THREE.Vector2(BOX_SIZE.x, 0), new THREE.Vector2(BOX_SIZE.x, BOX_SIZE.y)],
-            [new THREE.Vector2(BOX_SIZE.x, BOX_SIZE.y), new THREE.Vector2(0, BOX_SIZE.y)],
-            [new THREE.Vector2(0, BOX_SIZE.y), new THREE.Vector2(0, 0)]
-        ];
-
-        let sph = new SPH2D(numParticles, h, dt, grav, box, lines, fluidCenter, boundarySpacing);
+        let sph = new SPH2D(n, h, dt, grav, box, scaledLines, fluidCenter, boundarySpacing);
         let particles = sph.createParticles();
 
         function generateCircleTexture() {
@@ -98,16 +133,26 @@ export function ThreeScene2D() {
             100
         );
         camera.position.set(0, 0, 10);
-        camera.lookAt(0, 0, 0);
-
-        camera.position.x = BOX_SIZE.x * SCALE_PIXELS / 2;
-        camera.position.y = BOX_SIZE.y * SCALE_PIXELS / 2;
+        camera.lookAt(0, 0, 0);  
 
         // Renderer
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(mount.clientWidth, mount.clientHeight);
         renderer.setClearColor(0x87CEEB);
         mount.appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableRotate = false;    
+        controls.enablePan = true;        
+        controls.enableZoom = true;       
+        controls.zoomSpeed = 1.0;         
+        controls.panSpeed = 0.8;          
+        controls.enableDamping = true;    
+        controls.dampingFactor = 0.05;    
+        controls.minZoom = 0.5;            
+        controls.maxZoom = 4;
+        controls.target.set(0, 0, 0);     
+        controls.update();
 
         // Filter fluid particles
         let fluidParticles = particles.filter(p => p.type === 'fluid');
@@ -135,7 +180,7 @@ export function ThreeScene2D() {
         //const material = new THREE.PointsMaterial({ size: BALL_SIZE, sizeAttenuation: false, color: 0x0000ff }); // Size in pixels
         const circleTexture = generateCircleTexture();
         const material = new THREE.PointsMaterial({
-            size: BALL_SIZE, 
+            size: BALL_SIZE,
             sizeAttenuation: false,
             map: circleTexture,
             transparent: true,
@@ -143,6 +188,7 @@ export function ThreeScene2D() {
             vertexColors: true
         });
         const points = new THREE.Points(geometry, material);
+        points.frustumCulled = false;
         scene.add(points);
 
         // Filter boundary particules
@@ -164,7 +210,7 @@ export function ThreeScene2D() {
             map: circleTexture,
             transparent: true,
             alphaTest: 0.5,
-            color: 0x000000 
+            color: 0x000000
         });
         const pointsBoundary = new THREE.Points(geometryBoundary, materialBoundary);
         scene.add(pointsBoundary);
@@ -176,6 +222,7 @@ export function ThreeScene2D() {
 
         const animate = () => {
             animationFrameId = requestAnimationFrame(animate);
+            controls.update();
             if (!pausedRef.current) {
                 sph.stepAll(particles);
             }
@@ -244,10 +291,12 @@ export function ThreeScene2D() {
         };
     }, [resetTrigger]);
 
-    const handleApplyTemp = () => {
-        const newN = parseInt(tempN, 10);
+    const handleApplyTempN = () => {
+        const newN = parseFloat(tempN);
         if (!isNaN(newN) && newN > 0) {
-            setNumParticles(newN);
+            return newN
+        } else {
+            return 10
         }
     };
 
@@ -268,10 +317,10 @@ export function ThreeScene2D() {
             return 0.03
         }
     };
-    
+
     const handleApplyTempGRAV = () => {
         const newGRAV = parseFloat(tempGRAV);
-        if (!isNaN(newGRAV) && newGRAV > 0) {
+        if (!isNaN(newGRAV)) {
             return newGRAV
         } else {
             return -9.81
@@ -307,7 +356,7 @@ export function ThreeScene2D() {
 
     const handleApplyTempFluidY = () => {
         const newY = parseFloat(tempFluidY);
-        if (!isNaN(newY) && newY > 0) {
+        if (!isNaN(newY)) {
             return newY
         } else {
             return 0.5
@@ -315,12 +364,21 @@ export function ThreeScene2D() {
     };
 
     const handleApplyTempBoundarySpacing = () => {
-      const newSpacing = parseFloat(tempBoundarySpacing);
-      if (!isNaN(newSpacing) && newSpacing > 0) {
-          return newSpacing
-      } else {
-          return 0.02
-      }
+        const newSpacing = parseFloat(tempBoundarySpacing);
+        if (!isNaN(newSpacing) && newSpacing > 0) {
+            return newSpacing
+        } else {
+            return 0.02
+        }
+    };
+
+    const handleApplyTempScene = () => {
+        const newScene = parseInt(tempScene);
+        if (!isNaN(newScene) && newScene > 0) {
+            return newScene
+        } else {
+            return 0
+        }
     };
 
     return (
@@ -344,6 +402,8 @@ export function ThreeScene2D() {
                 setTempGRAV={setTempGRAV}
                 tempScale={tempScale}
                 setTempScale={setTempScale}
+                tempScene={tempScene}
+                setTempScene={setTempScene}
                 tempBoxX={tempBoxX}
                 setTempBoxX={setTempBoxX}
                 tempBoxY={tempBoxY}
@@ -358,7 +418,7 @@ export function ThreeScene2D() {
                 setTempFluidZ={setTempFluidZ}
                 tempBoundarySpacing={tempBoundarySpacing}
                 setTempBoundarySpacing={setTempBoundarySpacing}
-                
+
             />
         </Box>
     );

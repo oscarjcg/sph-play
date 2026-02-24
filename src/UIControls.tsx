@@ -19,6 +19,8 @@ export function UIControls({
     setTempGRAV,
     tempScale,
     setTempScale,
+    tempScene,
+    setTempScene,
     tempBoxX,
     setTempBoxX,
     tempBoxY,
@@ -52,6 +54,8 @@ export function UIControls({
     setTempGRAV: (v: string) => void;
     tempScale: string;
     setTempScale: (v: string) => void;
+    tempScene: string;
+    setTempScene: (v: string) => void;
     tempBoxX: string;
     setTempBoxX: (v: string) => void;
     tempBoxY: string;
@@ -207,6 +211,22 @@ export function UIControls({
                                 type="number"
                                 value={tempScale}
                                 onChange={(e) => setTempScale(e.target.value)}
+                                variant="outlined"
+                                size="small"
+                                sx={{ color: 'text.primary' }}
+                            />
+                        </Stack>
+
+                        <Stack direction="row" spacing={2} alignItems="center">
+                            <Typography
+                                sx={{ color: 'text.primary' }}
+                            >
+                                Scene:
+                            </Typography>
+                            <TextField
+                                type="number"
+                                value={tempScene}
+                                onChange={(e) => setTempScene(e.target.value)}
                                 variant="outlined"
                                 size="small"
                                 sx={{ color: 'text.primary' }}

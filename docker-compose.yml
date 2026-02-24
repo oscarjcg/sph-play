@@ -8,4 +8,4 @@ services:
     container_name: sph-basic
     volumes:
       - .:/usr/src/sph-basic
-    command: npm run dev -- --host
+    command: npm run dev -- --host # npm install
