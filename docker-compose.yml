@@ -1,11 +1,23 @@
+x-app: &app
+  build:
+    context: .
+    dockerfile: Dockerfile
+  volumes:
+    - .:/usr/src/sph-basic
+    - node_modules:/usr/src/sph-basic/node_modules
+
 services:
   sph-basic:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    <<: *app
+    container_name: sph-basic
     ports:
       - "5173:5173"
-    container_name: sph-basic
-    volumes:
-      - .:/usr/src/sph-basic
-    command: npm run dev -- --host # npm install
+    command: sh -c "npm install --no-audit --no-fund && npm run dev -- --host"
+
+  build:
+    <<: *app
+    profiles: ["build"]
+    command: sh -c "npm install --no-audit --no-fund && npm run build"
+
+volumes:
+  node_modules:

@@ -4,9 +4,15 @@
 * Basic implementation of SPH to simulate water
 
 **Docker**:
-* Install dependencies. Replace in docker compose file `npm run dev -- --host` with `npm install`. Undo after
+* Development: installs dependencies and starts the dev server (http://localhost:5173)
     * `docker compose up`
-* Run docker compose and it will start npm start (http://localhost:5173)
-    * `docker compose up`
-* Delete container (not image and node_modules)
+* Production build: installs dependencies and writes the static site to `./dist`
+    * `docker compose run --rm build`
+* Delete containers (keeps the image and the `node_modules` volume)
     * `docker compose down`
+* Reset dependencies (also deletes the `node_modules` volume; the next run reinstalls them)
+    * `docker compose down -v`
+* Rebuild the image after changing the `Dockerfile`
+    * `docker compose build`
+
+Dependencies are stored in a Docker volume, not in the project folder, so `./node_modules` is not used.
