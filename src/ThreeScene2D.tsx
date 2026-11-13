@@ -29,7 +29,7 @@ export function ThreeScene2D() {
     const pausedRef = useRef(isPaused);
     const [fps, setFps] = useState(0);
 
-    let SCALE_PIXELS = parseFloat(tempScale);
+    const SCALE_PIXELS = parseFloat(tempScale);
     const BALL_SIZE = 5;
 
     useEffect(() => {
@@ -43,13 +43,13 @@ export function ThreeScene2D() {
         // Color normalization
         const MAX_SPEED = 1.0;
 
-        let n = handleApplyTempN();
-        let h = handleApplyTempH();
-        let dt = handleApplyTempDT()
-        let grav = handleApplyTempGRAV()
-        let box = new THREE.Vector2(handleApplyTempBoxX(), handleApplyTempBoxY());
-        let boundarySpacing = handleApplyTempBoundarySpacing();
-        let fluidCenter = new THREE.Vector2(handleApplyTempFluidX(), handleApplyTempFluidY())
+        const n = handleApplyTempN();
+        const h = handleApplyTempH();
+        const dt = handleApplyTempDT()
+        const grav = handleApplyTempGRAV()
+        const box = new THREE.Vector2(handleApplyTempBoxX(), handleApplyTempBoxY());
+        const boundarySpacing = handleApplyTempBoundarySpacing();
+        const fluidCenter = new THREE.Vector2(handleApplyTempFluidX(), handleApplyTempFluidY())
         
         let lines: Line[] = [
             [new THREE.Vector2(0, 0), new THREE.Vector2(box.x, 0)],
@@ -95,8 +95,8 @@ export function ThreeScene2D() {
             ]);
         }
 
-        let sph = new SPH2D(n, h, dt, grav, box, scaledLines, fluidCenter, boundarySpacing);
-        let particles = sph.createParticles();
+        const sph = new SPH2D(n, h, dt, grav, box, scaledLines, fluidCenter, boundarySpacing);
+        const particles = sph.createParticles();
 
         function generateCircleTexture() {
             const canvas = document.createElement('canvas');
@@ -155,7 +155,7 @@ export function ThreeScene2D() {
         controls.update();
 
         // Filter fluid particles
-        let fluidParticles = particles.filter(p => p.type === 'fluid');
+        const fluidParticles = particles.filter(p => p.type === 'fluid');
 
         // Create points for fluid particles
         const geometry = new THREE.BufferGeometry();
@@ -238,7 +238,7 @@ export function ThreeScene2D() {
                 if (tempVColor) {
                     const speed = fluidParticles[i].v.length();
                     const normalized = Math.min(speed / MAX_SPEED, 1);
-                    let r = 0, g = 0, b = 0;
+                    let r: number, g: number, b: number;
                     if (normalized < 0.5) {
                         r = 0;
                         g = normalized * 2;

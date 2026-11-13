@@ -54,85 +54,85 @@ export class SPH3D {
 
     createParticles() {
         //let particles: Particle[] = GenerationUtil3D.generateCube(N, this.fluidCenter)
-        let particles: Particle[] = GenerationUtil3D.generateSphere(N, this.fluidCenter)
+        const particles: Particle[] = GenerationUtil3D.generateSphere(N, this.fluidCenter)
         
 
         // Boundary particles
-        let numLayers = 1;
+        const numLayers = 1;
         // Bottom
         for (let l = 0; l < numLayers; l++) {
-            let y = - (l + 1) * boundarySpacing;
-            let nx = Math.floor(BOX_SIZE.x / boundarySpacing) + 1;
-            let nz = Math.floor(BOX_SIZE.z / boundarySpacing) + 1;
+            const y = - (l + 1) * boundarySpacing;
+            const nx = Math.floor(BOX_SIZE.x / boundarySpacing) + 1;
+            const nz = Math.floor(BOX_SIZE.z / boundarySpacing) + 1;
             for (let i = 0; i < nx; i++) {
                 for (let k = 0; k < nz; k++) {
-                    let x = i * boundarySpacing;
-                    let z = k * boundarySpacing;
+                    const x = i * boundarySpacing;
+                    const z = k * boundarySpacing;
                     particles.push(new Particle([x, y, z], 'boundary'));
                 }
             }
         }
         // Top
         for (let l = 0; l < numLayers; l++) {
-            let y = BOX_SIZE.y + (l + 1) * boundarySpacing;
-            let nx = Math.floor(BOX_SIZE.x / boundarySpacing) + 1;
-            let nz = Math.floor(BOX_SIZE.z / boundarySpacing) + 1;
+            const y = BOX_SIZE.y + (l + 1) * boundarySpacing;
+            const nx = Math.floor(BOX_SIZE.x / boundarySpacing) + 1;
+            const nz = Math.floor(BOX_SIZE.z / boundarySpacing) + 1;
             for (let i = 0; i < nx; i++) {
                 for (let k = 0; k < nz; k++) {
-                    let x = i * boundarySpacing;
-                    let z = k * boundarySpacing;
+                    const x = i * boundarySpacing;
+                    const z = k * boundarySpacing;
                     particles.push(new Particle([x, y, z], 'boundary'));
                 }
             }
         }
         // Left
         for (let l = 0; l < numLayers; l++) {
-            let x = - (l + 1) * boundarySpacing;
-            let nyCol = Math.floor(BOX_SIZE.y / boundarySpacing) + 1 + numLayers * 2;
-            let nz = Math.floor(BOX_SIZE.z / boundarySpacing) + 1;
+            const x = - (l + 1) * boundarySpacing;
+            const nyCol = Math.floor(BOX_SIZE.y / boundarySpacing) + 1 + numLayers * 2;
+            const nz = Math.floor(BOX_SIZE.z / boundarySpacing) + 1;
             for (let j = -numLayers; j < nyCol - numLayers; j++) {
                 for (let k = 0; k < nz; k++) {
-                    let y = j * boundarySpacing;
-                    let z = k * boundarySpacing;
+                    const y = j * boundarySpacing;
+                    const z = k * boundarySpacing;
                     particles.push(new Particle([x, y, z], 'boundary'));
                 }
             }
         }
         // Right
         for (let l = 0; l < numLayers; l++) {
-            let x = BOX_SIZE.x + (l + 1) * boundarySpacing;
-            let nyCol = Math.floor(BOX_SIZE.y / boundarySpacing) + 1 + numLayers * 2;
-            let nz = Math.floor(BOX_SIZE.z / boundarySpacing) + 1;
+            const x = BOX_SIZE.x + (l + 1) * boundarySpacing;
+            const nyCol = Math.floor(BOX_SIZE.y / boundarySpacing) + 1 + numLayers * 2;
+            const nz = Math.floor(BOX_SIZE.z / boundarySpacing) + 1;
             for (let j = -numLayers; j < nyCol - numLayers; j++) {
                 for (let k = 0; k < nz; k++) {
-                    let y = j * boundarySpacing;
-                    let z = k * boundarySpacing;
+                    const y = j * boundarySpacing;
+                    const z = k * boundarySpacing;
                     particles.push(new Particle([x, y, z], 'boundary'));
                 }
             }
         }
         // Front
         for (let l = 0; l < numLayers; l++) {
-            let z = - (l + 1) * boundarySpacing;
-            let nx = Math.floor(BOX_SIZE.x / boundarySpacing) + 1;
-            let nyCol = Math.floor(BOX_SIZE.y / boundarySpacing) + 1 + numLayers * 2;
+            const z = - (l + 1) * boundarySpacing;
+            const nx = Math.floor(BOX_SIZE.x / boundarySpacing) + 1;
+            const nyCol = Math.floor(BOX_SIZE.y / boundarySpacing) + 1 + numLayers * 2;
             for (let i = 0; i < nx; i++) {
                 for (let j = -numLayers; j < nyCol - numLayers; j++) {
-                    let x = i * boundarySpacing;
-                    let y = j * boundarySpacing;
+                    const x = i * boundarySpacing;
+                    const y = j * boundarySpacing;
                     particles.push(new Particle([x, y, z], 'boundary'));
                 }
             }
         }
         // Back
         for (let l = 0; l < numLayers; l++) {
-            let z = BOX_SIZE.z + (l + 1) * boundarySpacing;
-            let nx = Math.floor(BOX_SIZE.x / boundarySpacing) + 1;
-            let nyCol = Math.floor(BOX_SIZE.y / boundarySpacing) + 1 + numLayers * 2;
+            const z = BOX_SIZE.z + (l + 1) * boundarySpacing;
+            const nx = Math.floor(BOX_SIZE.x / boundarySpacing) + 1;
+            const nyCol = Math.floor(BOX_SIZE.y / boundarySpacing) + 1 + numLayers * 2;
             for (let i = 0; i < nx; i++) {
                 for (let j = -numLayers; j < nyCol - numLayers; j++) {
-                    let x = i * boundarySpacing;
-                    let y = j * boundarySpacing;
+                    const x = i * boundarySpacing;
+                    const y = j * boundarySpacing;
                     particles.push(new Particle([x, y, z], 'boundary'));
                 }
             }
@@ -153,28 +153,28 @@ export class SPH3D {
     }
 
     gradKernel(r: THREE.Vector3, h: number): THREE.Vector3 {
-        let rn = r.length();
+        const rn = r.length();
         if (rn === 0.0) return new THREE.Vector3(0, 0, 0);
-        let q = rn / h;
+        const q = rn / h;
         if (q > 1.0) return new THREE.Vector3(0, 0, 0);
-        let sigma = 8.0 / (Math.PI * h ** 3);
+        const sigma = 8.0 / (Math.PI * h ** 3);
         let dfdq: number;
         if (q <= 0.5) {
             dfdq = 18.0 * q ** 2 - 12.0 * q;
         } else {
             dfdq = -6.0 * (1.0 - q) ** 2;
         }
-        let dir = r.clone().normalize();
+        const dir = r.clone().normalize();
         return dir.multiplyScalar(sigma * dfdq / h);
     }
 
     buildGrid(particles: Particle[], cell_size: number): Grid {
-        let grid: Grid = new Map();
+        const grid: Grid = new Map();
         particles.forEach((p, i) => {
-            let cx = Math.floor(p.r.x / cell_size);
-            let cy = Math.floor(p.r.y / cell_size);
-            let cz = Math.floor(p.r.z / cell_size);
-            let key = `${cx},${cy},${cz}`;
+            const cx = Math.floor(p.r.x / cell_size);
+            const cy = Math.floor(p.r.y / cell_size);
+            const cz = Math.floor(p.r.z / cell_size);
+            const key = `${cx},${cy},${cz}`;
             if (!grid.has(key)) grid.set(key, []);
             grid.get(key)!.push(i);
         });
@@ -182,17 +182,17 @@ export class SPH3D {
     }
 
     getNeighbors(i: number, particles: Particle[], h: number, grid: Grid, cell_size: number): number[] {
-        let neighbors: number[] = [];
-        let p = particles[i];
-        let cx = Math.floor(p.r.x / cell_size);
-        let cy = Math.floor(p.r.y / cell_size);
-        let cz = Math.floor(p.r.z / cell_size);
+        const neighbors: number[] = [];
+        const p = particles[i];
+        const cx = Math.floor(p.r.x / cell_size);
+        const cy = Math.floor(p.r.y / cell_size);
+        const cz = Math.floor(p.r.z / cell_size);
         for (let dx = -1; dx <= 1; dx++) {
             for (let dy = -1; dy <= 1; dy++) {
                 for (let dz = -1; dz <= 1; dz++) {
-                    let key = `${cx + dx},${cy + dy},${cz + dz}`;
+                    const key = `${cx + dx},${cy + dy},${cz + dz}`;
                     if (grid.has(key)) {
-                        for (let j of grid.get(key)!) {
+                        for (const j of grid.get(key)!) {
                             if (i !== j && p.r.clone().sub(particles[j].r).length() < h) {
                                 neighbors.push(j);
                             }
@@ -207,8 +207,8 @@ export class SPH3D {
     computeDensities(particles: Particle[], h: number, m: number, neighborLists: number[][]): void {
         for (let i = 0; i < particles.length; i++) {
             let rho = m * this.kernel(new THREE.Vector3(0, 0, 0), h);
-            let neighbors = neighborLists[i];
-            for (let j of neighbors) {
+            const neighbors = neighborLists[i];
+            for (const j of neighbors) {
                 rho += m * this.kernel(particles[i].r.clone().sub(particles[j].r), h);
             }
             particles[i].rho = rho;
@@ -216,7 +216,7 @@ export class SPH3D {
     }
 
     computePressures(particles: Particle[], rho0: number, k: number): void {
-        for (let p of particles) {
+        for (const p of particles) {
             p.p = k * (p.rho / rho0 - 1.0);
             if (p.p < 0) p.p = 0.0;
         }
@@ -227,8 +227,8 @@ export class SPH3D {
     }
 
     private step(particles: Particle[], dt: number, h: number, m: number, visc: number, rho0: number, k: number, grav: THREE.Vector3): void {
-        let grid = this.buildGrid(particles, CELL_SIZE);
-        let neighborLists: number[][] = particles.map(() => []);
+        const grid = this.buildGrid(particles, CELL_SIZE);
+        const neighborLists: number[][] = particles.map(() => []);
         for (let i = 0; i < particles.length; i++) {
             neighborLists[i] = this.getNeighbors(i, particles, h, grid, CELL_SIZE);
         }
@@ -236,18 +236,18 @@ export class SPH3D {
         this.computeDensities(particles, h, m, neighborLists);
         // Viscosity forces
         // TODO Creating several arrays on each step, triggering garbage collection, reuse arrays
-        let fVisc: THREE.Vector3[] = particles.map(() => new THREE.Vector3(0, 0, 0));
+        const fVisc: THREE.Vector3[] = particles.map(() => new THREE.Vector3(0, 0, 0));
         for (let i = 0; i < particles.length; i++) {
             if (particles[i].type !== 'fluid') continue;
-            let lapV = new THREE.Vector3(0, 0, 0);
-            let neighbors = neighborLists[i];
-            for (let j of neighbors) {
-                let r_ij = particles[i].r.clone().sub(particles[j].r);
-                let rn = r_ij.length();
+            const lapV = new THREE.Vector3(0, 0, 0);
+            const neighbors = neighborLists[i];
+            for (const j of neighbors) {
+                const r_ij = particles[i].r.clone().sub(particles[j].r);
+                const rn = r_ij.length();
                 if (rn === 0) continue;
-                let gradW = this.gradKernel(r_ij, h);
-                let gwNorm = gradW.length();
-                let term = particles[j].v.clone().sub(particles[i].v).multiplyScalar((m / particles[j].rho) * 2.0 * gwNorm / rn);
+                const gradW = this.gradKernel(r_ij, h);
+                const gwNorm = gradW.length();
+                const term = particles[j].v.clone().sub(particles[i].v).multiplyScalar((m / particles[j].rho) * 2.0 * gwNorm / rn);
                 lapV.add(term);
             }
             fVisc[i] = lapV.multiplyScalar(visc * m);
@@ -269,12 +269,12 @@ export class SPH3D {
         const fPress: THREE.Vector3[] = particles.map(() => new THREE.Vector3(0, 0, 0));
         for (let i = 0; i < particles.length; i++) {
             if (particles[i].type !== 'fluid') continue;
-            let gradP = new THREE.Vector3(0, 0, 0);
-            let neighbors = neighborLists[i];
-            for (let j of neighbors) {
-                let r_ij = particles[i].r.clone().sub(particles[j].r);
-                let gradW = this.gradKernel(r_ij, h);
-                let term = (particles[i].p / (particles[i].rho ** 2) + particles[j].p / (particles[j].rho ** 2)) * m;
+            const gradP = new THREE.Vector3(0, 0, 0);
+            const neighbors = neighborLists[i];
+            for (const j of neighbors) {
+                const r_ij = particles[i].r.clone().sub(particles[j].r);
+                const gradW = this.gradKernel(r_ij, h);
+                const term = (particles[i].p / (particles[i].rho ** 2) + particles[j].p / (particles[j].rho ** 2)) * m;
                 gradP.add(gradW.multiplyScalar(term));
             }
             const aPress = gradP.negate();
@@ -286,9 +286,9 @@ export class SPH3D {
                 particles[i].v.set(0, 0, 0);
                 continue;
             }
-            let dv = fPress[i].clone().multiplyScalar(dt / m);
+            const dv = fPress[i].clone().multiplyScalar(dt / m);
             particles[i].v = vStar[i].clone().add(dv);
-            let dr = particles[i].v.clone().multiplyScalar(dt);
+            const dr = particles[i].v.clone().multiplyScalar(dt);
             particles[i].r.add(dr);
         }
     }

@@ -28,7 +28,7 @@ export function ThreeScene3D() {
   const [fps, setFps] = useState(0);
 
   
-  let SCALE_PIXELS = parseFloat(tempScale);
+  const SCALE_PIXELS = parseFloat(tempScale);
 
   useEffect(() => {
     pausedRef.current = isPaused;
@@ -43,16 +43,16 @@ export function ThreeScene3D() {
     // Color normalization
     const MAX_SPEED = 1.0;
 
-    let n = handleApplyTempN();
-    let h = handleApplyTempH();
-    let dt = handleApplyTempDT();
-    let grav = handleApplyTempGRAV()
-    let box = new THREE.Vector3(handleApplyTempBoxX(), handleApplyTempBoxY(), handleApplyTempBoxZ())
-    let fluidCenter = new THREE.Vector3(handleApplyTempFluidX(), handleApplyTempFluidY(), handleApplyTempFluidZ())
+    const n = handleApplyTempN();
+    const h = handleApplyTempH();
+    const dt = handleApplyTempDT();
+    const grav = handleApplyTempGRAV()
+    const box = new THREE.Vector3(handleApplyTempBoxX(), handleApplyTempBoxY(), handleApplyTempBoxZ())
+    const fluidCenter = new THREE.Vector3(handleApplyTempFluidX(), handleApplyTempFluidY(), handleApplyTempFluidZ())
 
-    let sph = new SPH3D(n, h, dt, grav, box, fluidCenter, handleApplyTempBoundarySpacing())
+    const sph = new SPH3D(n, h, dt, grav, box, fluidCenter, handleApplyTempBoundarySpacing())
 
-    let particles = sph.createParticles();
+    const particles = sph.createParticles();
 
     function generateCircleTexture() {
       const canvas = document.createElement('canvas');
@@ -98,7 +98,7 @@ export function ThreeScene3D() {
     const controls = new OrbitControls(camera, renderer.domElement);
 
     // Filter fluid particles
-    let fluidParticles = particles.filter(p => p.type === 'fluid');
+    const fluidParticles = particles.filter(p => p.type === 'fluid');
 
     // Create points for fluid particles
     const geometry = new THREE.BufferGeometry();
@@ -178,7 +178,7 @@ export function ThreeScene3D() {
           // Update velocity color
           const speed = fluidParticles[i].v.length();
           const normalized = Math.min(speed / MAX_SPEED, 1);
-          let r = 0, g = 0, b = 0;
+          let r: number, g: number, b: number;
           if (normalized < 0.5) {
             r = 0;
             g = normalized * 2;

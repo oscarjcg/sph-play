@@ -80,7 +80,7 @@ export function UIControls({
             </Typography>
 
             <Stack direction="column" spacing={2} sx={{ position: 'absolute', zIndex: 10, top: '50px', left: '10px' }}>
-                <Stack direction="row" spacing={2} alignItems="center">
+                <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
                     <Typography
                         sx={{ color: 'text.primary' }}
                     >
@@ -104,7 +104,7 @@ export function UIControls({
                 >
                     <Stack direction="column" spacing={2} sx={{ display: tempControls ? 'flex' : 'none' }}>
                         {/* Buttons */}
-                        <Stack direction="row" spacing={2} alignItems="center">
+                        <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
                             <Button
                                 variant="contained"
                                 color="primary"
@@ -123,7 +123,7 @@ export function UIControls({
                             </Button>
                         </Stack>
 
-                        <Stack direction="row" spacing={2} alignItems="center">
+                        <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
                             <Typography
                                 sx={{ color: 'text.primary' }}
                             >
@@ -137,7 +137,7 @@ export function UIControls({
                         </Stack>
 
                         {/* N Particules */}
-                        <Stack direction="row" spacing={2} alignItems="center">
+                        <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
                             <Typography
                                 sx={{ color: 'text.primary' }}
                             >
@@ -153,7 +153,7 @@ export function UIControls({
                             />
                         </Stack>
 
-                        <Stack direction="row" spacing={2} alignItems="center">
+                        <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
                             <Typography
                                 sx={{ color: 'text.primary' }}
                             >
@@ -169,7 +169,7 @@ export function UIControls({
                             />
                         </Stack>
 
-                        <Stack direction="row" spacing={2} alignItems="center">
+                        <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
                             <Typography
                                 sx={{ color: 'text.primary' }}
                             >
@@ -185,7 +185,7 @@ export function UIControls({
                             />
                         </Stack>
 
-                        <Stack direction="row" spacing={2} alignItems="center">
+                        <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
                             <Typography
                                 sx={{ color: 'text.primary' }}
                             >
@@ -201,7 +201,7 @@ export function UIControls({
                             />
                         </Stack>
 
-                        <Stack direction="row" spacing={2} alignItems="center">
+                        <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
                             <Typography
                                 sx={{ color: 'text.primary' }}
                             >
@@ -217,7 +217,7 @@ export function UIControls({
                             />
                         </Stack>
 
-                        <Stack direction="row" spacing={2} alignItems="center">
+                        <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
                             <Typography
                                 sx={{ color: 'text.primary' }}
                             >
@@ -236,7 +236,7 @@ export function UIControls({
                         <Stack direction="column" spacing={2}>
 
                             {/* Box */}
-                            <Stack direction="row" spacing={2} alignItems="center">
+                            <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
                                 <Typography
                                     sx={{ color: 'text.primary' }}
                                 >
@@ -251,7 +251,7 @@ export function UIControls({
                                     sx={{ color: 'text.primary' }}
                                 />
                             </Stack>
-                            <Stack direction="row" spacing={2} alignItems="center">
+                            <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
                                 <Typography
                                     sx={{ color: 'text.primary' }}
                                 >
@@ -267,7 +267,7 @@ export function UIControls({
                                 />
 
                             </Stack>
-                            <Stack direction="row" spacing={2} alignItems="center">
+                            <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
                                 <Typography
                                     sx={{ color: 'text.primary' }}
                                 >
@@ -285,7 +285,7 @@ export function UIControls({
                             </Stack>
 
                             {/* Fluid */}
-                            <Stack direction="row" spacing={2} alignItems="center">
+                            <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
                                 <Typography
                                     sx={{ color: 'text.primary' }}
                                 >
@@ -300,7 +300,7 @@ export function UIControls({
                                     sx={{ color: 'text.primary' }}
                                 />
                             </Stack>
-                            <Stack direction="row" spacing={2} alignItems="center">
+                            <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
                                 <Typography
                                     sx={{ color: 'text.primary' }}
                                 >
@@ -316,7 +316,7 @@ export function UIControls({
                                 />
 
                             </Stack>
-                            <Stack direction="row" spacing={2} alignItems="center">
+                            <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
                                 <Typography
                                     sx={{ color: 'text.primary' }}
                                 >
@@ -334,7 +334,7 @@ export function UIControls({
                             </Stack>
                         </Stack>
 
-                        <Stack direction="row" spacing={2} alignItems="center">
+                        <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
                             <Typography
                                 sx={{ color: 'text.primary' }}
                             >

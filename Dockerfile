@@ -1,4 +1,4 @@
-FROM node:24.12.0 as node
+FROM node:26.13.1 AS node
 
 WORKDIR /usr/src/sph-basic
 EXPOSE 5173
